@@ -8,4 +8,13 @@ export default {
     preto_claro: "#000000",
     preto: "#2A2A2A",
     branco: "#FFFFFF",
+    white: "#FFFFFF",
+    black: "#000000",
+
+    Blue_dark: "#008CFF",
+    Blue_light: "#C7E6FF",
+    Blue: "#3883E0",
+
+    Gray_light: "#CCCCCC",
+    Gray_dark: "#666666",
 }

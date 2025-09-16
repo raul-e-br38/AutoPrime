@@ -19,7 +19,7 @@ export default function LoginScreen({ navigation }) {
 
                 <View style={styles.cadastroContainer}>
                     <Text style={styles.txt}>Não tem uma conta? </Text>
-                    <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Cadastro')}>
                         <Text style={styles.cadastroText}>Cadastre-se</Text>
                     </TouchableOpacity>
                 </View>
