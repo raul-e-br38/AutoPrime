@@ -1,9 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './screens/LoginScreen';
-import HomeScreen from './screens/HomeScreens';
+import HomeScreen from './screens/HomeScreens'; // substitui pela tua tela real
 
 const Stack = createStackNavigator();
 
@@ -15,24 +15,15 @@ export default function App() {
                 <Stack.Screen
                     name="Login"
                     component={LoginScreen}
-                    options={{ headerShown: false }} // Não exibe o cabeçalho nesta tela
+                    options={{ headerShown: false }}
                 />
                 {/* Tela inicial do app */}
                 <Stack.Screen
                     name="Home"
                     component={HomeScreen}
-                    options={{ headerShown: false }} // Não exibe o cabeçalho na tela Home
+                    options={{ headerShown: false }}
                 />
             </Stack.Navigator>
         </NavigationContainer>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});
