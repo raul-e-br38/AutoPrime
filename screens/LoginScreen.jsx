@@ -1,10 +1,29 @@
-import React from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity, Alert } from 'react-native';
 import Input from '../components/Input';
 import BtnEnviar from '../components/BtnEnviar';
 import colors from "../design/colors";
+import { login } from "../services/autenticacaoService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen({ navigation }) {
+    const [email, setEmail] = useState("");
+    const [senha, setSenha] = useState("");
+
+    const handleLogin = async () => {
+        try {
+            const userData = await login(email, senha);
+
+            // Salva token no AsyncStorage
+            await AsyncStorage.setItem("token", userData.token);
+
+            Alert.alert("Sucesso", `Bem-vindo, ${userData.nome}`);
+            navigation.navigate("Home");
+        } catch (error) {
+            Alert.alert("Erro", error.message);
+        }
+    };
+
     return (
         <ImageBackground
             source={require("../assets/fundoLogin.jpg")}
@@ -14,8 +33,8 @@ export default function LoginScreen({ navigation }) {
             <View style={styles.container}>
                 <Text style={styles.text}>Login</Text>
 
-                <Input placeholder="Email" />
-                <Input placeholder="Senha" />
+                <Input placeholder="Email" value={email} onChangeText={setEmail} />
+                <Input placeholder="Senha" value={senha} onChangeText={setSenha} secureTextEntry />
 
                 <View style={styles.cadastroContainer}>
                     <Text style={styles.txt}>Não tem uma conta? </Text>
@@ -24,7 +43,7 @@ export default function LoginScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                <BtnEnviar />
+                <BtnEnviar onPress={handleLogin} title="Entrar" />
             </View>
 
             <Image
@@ -70,7 +89,7 @@ const styles = StyleSheet.create({
         marginBottom: 40,
         resizeMode: 'contain',
     },
-    txt:{
+    txt: {
         fontWeight: 'bold',
     }
 });

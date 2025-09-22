@@ -1,27 +1,25 @@
 import React from 'react';
-import {TouchableOpacity, Text, StyleSheet, ScrollView} from 'react-native';
-import Input from "./Input";
+import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import colors from "../design/colors";
 
-
-export default function BtnEnviar() {
+export default function BtnEnviar({ onPress, title }) {
     return (
-        <TouchableOpacity style={styles.btn}>
-            <Text style={styles.btnTxt}>Entrar</Text>
+        <TouchableOpacity style={styles.btn} onPress={onPress}>
+            <Text style={styles.btnTxt}>{title}</Text>
         </TouchableOpacity>
     )
 }
 
 const styles = StyleSheet.create({
-    btn:{
+    btn: {
         backgroundColor: colors.azul,
         paddingVertical: 10,
         borderRadius: 9,
         alignItems: 'center',
         width: '65%',
-        marginTop: 40,
+        marginTop: 10,
     },
-    btnTxt:{
+    btnTxt: {
         color: colors.branco,
         fontSize: 16,
         fontWeight: 'bold',
