@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity, Alert } from 'react-native';
 import Input from '../components/Input';
 import BtnEnviar from '../components/BtnEnviar';
 import colors from "../design/colors";
@@ -11,16 +11,39 @@ export default function LoginScreen({ navigation }) {
     const [senha, setSenha] = useState("");
 
     const handleLogin = async () => {
+        console.log("EMAIL:", email, "SENHA:", senha); // Debug!
         try {
-            const userData = await login(email, senha);
+            if (!email || !senha) {
+                Alert.alert("Erro", "Preencha email e senha");
+                return;
+            }
 
-            // Salva token no AsyncStorage
+            const userData = await login(email, senha);
+            console.log("LOGIN DATA RECEBIDA:", userData);
+
+            if (userData.error) {
+                Alert.alert("Erro", userData.error);
+                return;
+            }
+
+            if (!userData.token) {
+                Alert.alert("Erro", "Token não recebido do servidor");
+                return;
+            }
+
             await AsyncStorage.setItem("token", userData.token);
+            await AsyncStorage.setItem("nome", userData.nome);
+            console.log("TOKEN E NOME SALVOS:", userData.token, userData.nome);
 
             Alert.alert("Sucesso", `Bem-vindo, ${userData.nome}`);
-            navigation.navigate("Home");
+
+            navigation.reset({
+                index: 0,
+                routes: [{ name: "Home" }],
+            });
         } catch (error) {
-            Alert.alert("Erro", error.message);
+            console.log("ERRO LOGIN HANDLE:", error);
+            Alert.alert("Erro", error.message || "Erro ao fazer login");
         }
     };
 
@@ -32,9 +55,19 @@ export default function LoginScreen({ navigation }) {
         >
             <View style={styles.container}>
                 <Text style={styles.text}>Login</Text>
-
-                <Input placeholder="Email" value={email} onChangeText={setEmail} />
-                <Input placeholder="Senha" value={senha} onChangeText={setSenha} secureTextEntry />
+                <Input
+                    placeholder="Email"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                />
+                <Input
+                    placeholder="Senha"
+                    value={senha}
+                    onChangeText={setSenha}
+                    secureTextEntry
+                />
 
                 <View style={styles.cadastroContainer}>
                     <Text style={styles.txt}>Não tem uma conta? </Text>

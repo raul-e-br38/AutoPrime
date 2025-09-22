@@ -1,36 +1,30 @@
-const API_URL = "http://10.92.3.158:5000/";
+const API_URL = "http://10.92.3.174:5000"; // Coloque o IP certo da sua máquina
 
-// LOGIN
 export async function login(email, senha) {
     try {
         const response = await fetch(`${API_URL}/login`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, senha }),
         });
 
         const data = await response.json();
+        console.log("DADOS RECEBIDOS DO BACK:", data);
 
         if (!response.ok) {
             throw new Error(data.error || "Erro ao fazer login");
         }
-
-        return data; // vai trazer {mensagem, id_cadastro, nome, email, cargo, token}
+        return data;
     } catch (error) {
         throw error;
     }
 }
 
-// CADASTRO
 export async function cadastro(nome, email, cargo, senha) {
     try {
         const response = await fetch(`${API_URL}/cadastro`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ nome, email, cargo, senha }),
         });
 
@@ -39,8 +33,7 @@ export async function cadastro(nome, email, cargo, senha) {
         if (!response.ok) {
             throw new Error(data.error || "Erro ao cadastrar");
         }
-
-        return data; // {mensagem: "Usuário cadastrado com sucesso!"}
+        return data;
     } catch (error) {
         throw error;
     }
