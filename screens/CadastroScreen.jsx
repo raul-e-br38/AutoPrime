@@ -17,7 +17,7 @@ export default function CadastroScreen({ navigation }) {
                 <Input placeholder="Email" />
                 <Input placeholder="Cargo" />
                 <Input placeholder="Senha" />
-
+                <Text style={styles.termos}>Ao  continuar você concorda com nossos <Text style={styles.bold}>Termos de Política e Privacidade </Text></Text>
                 <View style={styles.cadastroContainer}>
                     <Text style={styles.txt}>Entre sua conta: </Text>
                     <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
         padding: 35,
         gap: 15,
         borderRadius: 20,
-        marginTop: 250,
+        marginTop: 200,
     },
     text: {
         fontSize: 22,
@@ -73,5 +73,12 @@ const styles = StyleSheet.create({
     },
     txt:{
         fontWeight: 'bold',
+    },
+    termos:{
+        textAlign: 'center',
+    },
+    bold:{
+        fontWeight: 'bold',
     }
+
 });
