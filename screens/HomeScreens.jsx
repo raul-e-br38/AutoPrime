@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import {View, Text, StyleSheet, Button, ScrollView} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Header from '../components/Header';
 
 const HomeScreens = ({ navigation }) => {
     const [nome, setNome] = useState("");
@@ -25,11 +26,14 @@ const HomeScreens = ({ navigation }) => {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Bem-vindo, {nome || "usuário"}!</Text>
-            <Text style={styles.text}>Seu token: {token || "não encontrado"}</Text>
-            <Button title="Sair" onPress={handleLogout} />
-        </View>
+        <ScrollView>
+            <Header/>
+            <View style={styles.container}>
+                <Text style={styles.title}>Bem-vindo, {nome || "usuário"}!</Text>
+                <Text style={styles.text}>Seu token: {token || "não encontrado"}</Text>
+                <Button title="Sair" onPress={handleLogout} />
+            </View>
+        </ScrollView>
     );
 };
 

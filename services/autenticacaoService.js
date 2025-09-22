@@ -9,7 +9,7 @@ export async function login(email, senha) {
         });
 
         const data = await response.json();
-        console.log("DADOS RECEBIDOS DO BACK:", data);
+
 
         if (!response.ok) {
             throw new Error(data.error || "Erro ao fazer login");
