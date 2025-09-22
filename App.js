@@ -3,8 +3,8 @@ import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './screens/LoginScreen';
-import HomeScreen from './screens/HomeScreens'; // substitui pela tua tela real
-import TelaCadastro from "./Screens/TelaCadastro";
+import HomeScreen from './screens/HomeScreens';
+import CadastroScreen from "./screens/CadastroScreen"; // substitui pela tua tela real
 
 const Stack = createStackNavigator();
 
@@ -26,8 +26,9 @@ export default function App() {
                 />
                 <Stack.Screen
                 name="Cadastro"
-                component={TelaCadastro}
-                options={{ headerShown: false }}/>
+                component={CadastroScreen}
+                options={{ headerShown: false }}
+                />
             </Stack.Navigator>
         </NavigationContainer>
     );
