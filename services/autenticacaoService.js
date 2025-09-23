@@ -1,4 +1,4 @@
-const API_URL = "http://10.92.3.168:5000/";
+const API_URL = "http://10.92.3.158:5000/";
 
 // LOGIN
 export async function login(email, senha) {

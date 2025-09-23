@@ -1,24 +1,46 @@
-    import React from 'react';
-    import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {View, Text, StyleSheet, Button, ScrollView} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Header from '../components/Header';
 
-    const HomeScreen = () => {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.text}>Bem-vindo ao Home Screen!</Text>
-            </View>
-        );
+const HomeScreens = ({ navigation }) => {
+    const [nome, setNome] = useState("");
+    const [token, setToken] = useState("");
+
+    useEffect(() => {
+        const loadUser = async () => {
+            const t = await AsyncStorage.getItem('token');
+            const n = await AsyncStorage.getItem('nome');
+            setToken(t || "");
+            setNome(n || "");
+        };
+        loadUser();
+    }, []);
+
+    const handleLogout = async () => {
+        await AsyncStorage.clear();
+        navigation.reset({
+            index: 0,
+            routes: [{ name: "Login" }],
+        });
     };
 
-    const styles = StyleSheet.create({
-        container: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        text: {
-            fontSize: 24,
-            fontWeight: 'bold',
-        },
-    });
+    return (
+        <ScrollView>
+            <Header/>
+            <View style={styles.container}>
+                <Text style={styles.title}>Bem-vindo, {nome || "usuário"}!</Text>
+                <Text style={styles.text}>Seu token: {token || "não encontrado"}</Text>
+                <Button title="Sair" onPress={handleLogout} />
+            </View>
+        </ScrollView>
+    );
+};
 
-    export default HomeScreen;
+const styles = StyleSheet.create({
+    container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
+    text: { fontSize: 16, textAlign: 'center', marginBottom: 20 }
+});
+
+export default HomeScreens;
