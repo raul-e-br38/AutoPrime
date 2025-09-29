@@ -125,7 +125,7 @@ export default function CadastroScreen({ navigation }) {
 
                     {/* SELECT de CARGO */}
                     <View style={styles.pickerContainer}>
-                            <RNPickerSelect
+                        <RNPickerSelect
                             onValueChange={(value) => setCargo(value)}
                             items={[
                                 { label: "Vendedor", value: "Vendedor" },

@@ -1,40 +1,40 @@
 import React from 'react';
-import {TouchableOpacity, Text, StyleSheet, TextInput, View, Image} from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, TextInput, View, Image } from 'react-native';
 import colors from "../design/colors";
 
 export default function Header() {
     return (
         <View>
-        <View style={styles.preto}><Text></Text></View>
-        <View style={styles.container}>
-            <Image style={styles.logo} source={require('../assets/logo.png')} />
-            <View style={styles.search}>
+            <View style={styles.preto}><Text></Text></View>
+            <View style={styles.container}>
+                <Image style={styles.logo} source={require('../assets/logo.png')} />
+                <View style={styles.search}>
 
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Buscar na AutoPrime"
-                    placeholderTextColor={colors.cinza_escuro}
-                />
-                <TouchableOpacity style={styles.searchButton}>
-
-                    <Image
-                        source={require("../assets/search.png")}
-                        style={styles.searchIcon}
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Buscar na AutoPrime"
+                        placeholderTextColor={colors.cinza_escuro}
                     />
+                    <TouchableOpacity style={styles.searchButton}>
+
+                        <Image
+                            source={require("../assets/search.png")}
+                            style={styles.searchIcon}
+                        />
+                    </TouchableOpacity>
+                </View>
+                <TouchableOpacity >
+                    <Image style={styles.user} source={require("../assets/user.png")} />
                 </TouchableOpacity>
             </View>
-            <TouchableOpacity >
-                <Image style={styles.user}  source={require("../assets/user.png")}/>
-            </TouchableOpacity>
-        </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     preto: {
-      padding: 5,
-      backgroundColor: colors.preto,
+        padding: 5,
+        backgroundColor: colors.preto,
     },
     container: {
         backgroundColor: colors.preto,
@@ -71,12 +71,12 @@ const styles = StyleSheet.create({
         height: 20,
         resizeMode: 'contain',
     },
-    user:{
+    user: {
         height: 30,
     },
-    logo:{
+    logo: {
         width: 80,
         height: 80,
-        marginRight:-20,
+        marginRight: -20,
     },
 });

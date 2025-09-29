@@ -1,12 +1,12 @@
 import React from 'react';
-import {TouchableOpacity, Text, StyleSheet, TextInput, View, Image} from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, TextInput, View, Image } from 'react-native';
 import colors from "../design/colors";
 
-export default function Marcas(){
+export default function Marcas() {
     return (
-            <TouchableOpacity style={styles.circle}>
-                <Image source={require('../assets/fiat.png')} style={styles.logo} resizeMode="contain" />
-            </TouchableOpacity>
+        <TouchableOpacity style={styles.circle}>
+            <Image source={require('../assets/fiat.png')} style={styles.logo} resizeMode="contain" />
+        </TouchableOpacity>
 
 
     )

@@ -3,13 +3,13 @@ import { TextInput, StyleSheet } from 'react-native';
 import colors from "../design/colors";
 
 export default function Input({
-                                  placeholder,
-                                  value,
-                                  onChangeText,
-                                  secureTextEntry = false,
-                                  keyboardType = "default",
-                                  ...props
-                              }) {
+    placeholder,
+    value,
+    onChangeText,
+    secureTextEntry = false,
+    keyboardType = "default",
+    ...props
+}) {
     return (
         <TextInput
             style={styles.input}
