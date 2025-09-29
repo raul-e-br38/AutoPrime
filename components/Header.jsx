@@ -4,6 +4,8 @@ import colors from "../design/colors";
 
 export default function Header() {
     return (
+        <View>
+        <View style={styles.preto}><Text></Text></View>
         <View style={styles.container}>
             <Image style={styles.logo} source={require('../assets/logo.png')} />
             <View style={styles.search}>
@@ -25,10 +27,15 @@ export default function Header() {
                 <Image style={styles.user}  source={require("../assets/user.png")}/>
             </TouchableOpacity>
         </View>
+        </View>
     )
 }
-  
+
 const styles = StyleSheet.create({
+    preto: {
+      padding: 5,
+      backgroundColor: colors.preto,
+    },
     container: {
         backgroundColor: colors.preto,
         justifyContent: 'space-between',
@@ -48,7 +55,7 @@ const styles = StyleSheet.create({
     },
     searchInput: {
         height: '100%',
-        paddingHorizontal: 30,
+        paddingHorizontal: 25,
     },
     searchButton: {
         backgroundColor: colors.azul_vibrante,

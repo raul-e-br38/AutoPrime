@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {View, Text, StyleSheet, Button, ScrollView} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/Header';
+import Marcas from "../components/Marcas";
 
 const HomeScreens = ({ navigation }) => {
     const [nome, setNome] = useState("");
@@ -29,8 +30,7 @@ const HomeScreens = ({ navigation }) => {
         <ScrollView>
             <Header/>
             <View style={styles.container}>
-                <Text style={styles.title}>Bem-vindo, {nome || "usuário"}!</Text>
-                <Text style={styles.text}>Seu token: {token || "não encontrado"}</Text>
+                <Marcas/>
                 <Button title="Sair" onPress={handleLogout} />
             </View>
         </ScrollView>
