@@ -7,16 +7,16 @@ export default function Header() {
         <View style={styles.container}>
             <Image style={styles.logo} source={require('../assets/logo.png')} />
             <View style={styles.search}>
-                {/* O TextInput e o botão de pesquisa ficam lado a lado */}
+
                 <TextInput
-                    style={styles.searchInput} // Estilo para o campo de texto
+                    style={styles.searchInput}
                     placeholder="Buscar na AutoPrime"
                     placeholderTextColor={colors.cinza_escuro}
                 />
                 <TouchableOpacity style={styles.searchButton}>
-                    {/* A imagem do ícone de pesquisa */}
+
                     <Image
-                        source={require("../assets/search.png")} // Substitua pelo caminho da sua imagem
+                        source={require("../assets/search.png")}
                         style={styles.searchIcon}
                     />
                 </TouchableOpacity>
@@ -27,7 +27,7 @@ export default function Header() {
         </View>
     )
 }
-
+  
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.preto,
