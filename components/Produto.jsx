@@ -1,15 +1,15 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, TextInput, View, Image } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
 import colors from "../design/colors";
 
-export default function Produto() {
+export default function Produto({ nome, preco, imagem, descricao }) {
     return (
         <TouchableOpacity style={styles.produto}>
-            <Image style={styles.foto} source={require('../assets/ponta.png')} />
-            <Text style={styles.nome}>Ponteira bolada</Text>
-            <Text style={styles.preco}>R$69,90</Text>
+            <Image style={styles.foto} source={{ uri: imagem }} />
+            <Text style={styles.nome}>{nome}</Text>
+            <Text style={styles.preco}>R${preco.toFixed(2)}</Text>
         </TouchableOpacity>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -19,19 +19,22 @@ const styles = StyleSheet.create({
         width: '50%',
         height: 200,
         borderRadius: 5,
-        marginLeft: -5
+        marginLeft: -5,
     },
-    foto:{
+    foto: {
         alignSelf: 'center',
         marginBottom: 15,
+        width: 100,
+        height: 100,
+        resizeMode: 'contain',
     },
-    nome:{
+    nome: {
         color: colors.azul_fonte,
-        fontWeight: "light",
+        fontWeight: "400",
         marginBottom: 5,
     },
-    preco:{
+    preco: {
         color: colors.azul_fonte,
         fontWeight: "bold",
     },
-})
+});

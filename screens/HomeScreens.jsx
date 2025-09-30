@@ -1,16 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button, ScrollView } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    Button,
+    ScrollView,
+    RefreshControl,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useIsFocused, useRoute } from '@react-navigation/native';
 import Header from '../components/Header';
 import Marcas from "../components/Marcas";
-import BtnEnviar from "../components/BtnEnviar"
+import BtnEnviar from "../components/BtnEnviar";
 import colors from "../design/colors";
 import Produto from "../components/Produto";
 import Footer from "../components/Footer";
+import produtoService from '../services/produtoService'; // import default
 
 const HomeScreens = ({ navigation }) => {
     const [nome, setNome] = useState("");
     const [token, setToken] = useState("");
+    const [produtos, setProdutos] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    const isFocused = useIsFocused();
+    const route = useRoute();
 
     useEffect(() => {
         const loadUser = async () => {
@@ -22,6 +36,23 @@ const HomeScreens = ({ navigation }) => {
         loadUser();
     }, []);
 
+    useEffect(() => {
+        carregarProdutos();
+    }, [isFocused, route.params?.refresh]);
+
+    const carregarProdutos = async () => {
+        setLoading(true);
+        try {
+            const produtosApi = await produtoService.listarProdutos();
+            setProdutos(produtosApi || []);
+        } catch (error) {
+            console.error("Erro ao carregar produtos:", error);
+            setProdutos([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleLogout = async () => {
         await AsyncStorage.clear();
         navigation.reset({
@@ -31,27 +62,40 @@ const HomeScreens = ({ navigation }) => {
     };
 
     return (
-        <ScrollView>
+        <ScrollView
+            refreshControl={
+                <RefreshControl refreshing={loading} onRefresh={carregarProdutos} />
+            }
+        >
             <Header />
             <View style={styles.container}>
                 <Marcas />
                 <Marcas />
                 <Marcas />
             </View>
-            <View style={styles.cadastrar}>
-            <BtnEnviar title={"Cadastrar Produto"} />
-            </View>
-            <Text style={styles.titulo}>Explore Nosso Catálogo</Text>
-            <View style={styles.produtos}>
-                <Produto/>
-                <Produto/>
-                <Produto/>
-                <Produto/>
-            </View>
 
+            <Text style={styles.titulo}>Explore Nosso Catálogo</Text>
+
+            <View style={styles.produtos}>
+                {produtos.length === 0 ? (
+                    <Text style={{ color: colors.black, width: '100%', textAlign: 'center' }}>
+                        Nenhum produto encontrado
+                    </Text>
+                ) : (
+                    produtos.map((item) => (
+                        <Produto
+                            key={item.id_produto}
+                            nome={item.nome}
+                            preco={parseFloat(item.preco)}
+                            imagem={`http://192.168.1.119:5000/${item.imagem.replace(/\\/g, '/')}`}
+                            descricao={item.descricao}
+                        />
+                    ))
+                )}
+            </View>
 
             <Button title="Sair" onPress={handleLogout} />
-            <Footer/>
+            <Footer />
         </ScrollView>
     );
 };
@@ -64,31 +108,24 @@ const styles = StyleSheet.create({
         padding: 20,
         flexDirection: 'row',
     },
-    titulo:{
+    titulo: {
         fontSize: 16,
         textAlign: 'center',
-        backgroundColor:colors.black,
+        backgroundColor: colors.black,
         padding: 20,
         color: colors.white,
         fontWeight: 'bold',
         letterSpacing: 1,
     },
-    cadastrar:{
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: 30,
-    },
     produtos: {
-        backgroundColor:colors.cinza,
+        backgroundColor: colors.cinza,
         padding: 20,
-        boxShadow: colors.black,
-        justifyContent: 'space-between',
         flexDirection: 'row',
-        display: 'flex',
         flexWrap: 'wrap',
+        justifyContent: 'space-between',
         rowGap: 10,
         marginVertical: 20,
-    }
+    },
 });
 
 export default HomeScreens;

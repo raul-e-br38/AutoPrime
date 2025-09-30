@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './screens/LoginScreen';
 import HomeScreens from './screens/HomeScreens';
-import CadastroScreen from "./screens/CadastroScreen"; // sua tela real de cadastro
+import CadastroScreen from "./screens/CadastroScreen";
 
 const Stack = createStackNavigator();
 
@@ -17,6 +17,7 @@ export default function App() {
                 <Stack.Screen name="Home" component={HomeScreens} />
                 {/* Tela de cadastro */}
                 <Stack.Screen name="Cadastro" component={CadastroScreen} />
+
             </Stack.Navigator>
         </NavigationContainer>
     );
