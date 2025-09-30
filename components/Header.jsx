@@ -10,6 +10,9 @@ export default function Header({ onSearch }) {
             onSearch(searchText.trim());
         }
     };
+    const perfil = () => {
+        navigation.navigate('PerfilScreen'); // <-- coloque o nome da tela que você quer ir
+    };
     return (
         <View>
             <View style={styles.preto}><Text></Text></View>
@@ -19,7 +22,7 @@ export default function Header({ onSearch }) {
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Buscar na AutoPrime"
-                        placeholderTextColor={colors.cinza_escuro}
+                        placeholderTextColor={colors.cinza}
                         value={searchText}
                         onChangeText={setSearchText}
                     />
@@ -27,7 +30,7 @@ export default function Header({ onSearch }) {
                         <Image source={require("../assets/search.png")} style={styles.searchIcon} />
                     </TouchableOpacity>
                 </View>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={perfil}>
                     <Image style={styles.user} source={require("../assets/user.png")} />
                 </TouchableOpacity>
             </View>

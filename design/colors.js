@@ -11,6 +11,7 @@ export default {
     branco: "#FFFFFF",
     white: "#FFFFFF",
     black: "#000000",
+    vermelho: "#FF0000",
 
     Blue_dark: "#008CFF",
     Blue_light: "#C7E6FF",

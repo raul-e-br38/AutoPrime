@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useIsFocused, useRoute } from '@react-navigation/native';
 import Header from '../components/Header';
-import Produto from '../components/Produto';
 import Footer from '../components/Footer';
-import produtoService from '../services/produtoService';
 import colors from "../design/colors";
+import Produto from '../components/Produto';
+import produtoService from '../services/produtoService';
 import Marcas from '../components/Marcas';
 
 const HomeScreens = () => {
