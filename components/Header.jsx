@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, TextInput, View, Image, StyleSheet, Text } from 'react-native';
 import colors from "../design/colors";
+import { useNavigation } from '@react-navigation/native'; // <-- Importando useNavigation
 
 export default function Header({ onSearch }) {
     const [searchText, setSearchText] = useState("");
+    const navigation = useNavigation();  // <-- Usando o hook para acessar a navegação
 
     const handleSearch = () => {
         if (onSearch && searchText.trim() !== "") {
             onSearch(searchText.trim());
         }
     };
+
     const perfil = () => {
-        navigation.navigate('PerfilScreen'); // <-- coloque o nome da tela que você quer ir
+        navigation.navigate('Perfil');
     };
+
     return (
         <View>
             <View style={styles.preto}><Text></Text></View>
@@ -37,9 +41,6 @@ export default function Header({ onSearch }) {
         </View>
     )
 }
-
-// Mantém seu styles igual
-
 
 const styles = StyleSheet.create({
     preto: {

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useIsFocused, useRoute } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import colors from "../design/colors";

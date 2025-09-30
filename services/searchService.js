@@ -1,5 +1,5 @@
 // searchService.js
-const API_URL = "http://192.168.1.119:5000";
+const API_URL = "http://192.168.1.132:5000";
 
 export async function buscarProdutos(nome) {
     try {
