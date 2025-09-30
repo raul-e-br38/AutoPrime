@@ -1,88 +1,71 @@
 import React, { useEffect, useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Button,
-    ScrollView,
-    RefreshControl,
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useIsFocused, useRoute } from '@react-navigation/native';
 import Header from '../components/Header';
-import Marcas from "../components/Marcas";
-import BtnEnviar from "../components/BtnEnviar";
+import Produto from '../components/Produto';
+import Footer from '../components/Footer';
+import produtoService from '../services/produtoService';
 import colors from "../design/colors";
-import Produto from "../components/Produto";
-import Footer from "../components/Footer";
-import produtoService from '../services/produtoService'; // import default
+import Marcas from '../components/Marcas';
 
-const HomeScreens = ({ navigation }) => {
-    const [nome, setNome] = useState("");
-    const [token, setToken] = useState("");
+const HomeScreens = () => {
     const [produtos, setProdutos] = useState([]);
+    const [produtosOriginais, setProdutosOriginais] = useState([]); // todos os produtos
     const [loading, setLoading] = useState(false);
-
     const isFocused = useIsFocused();
     const route = useRoute();
 
-    useEffect(() => {
-        const loadUser = async () => {
-            const t = await AsyncStorage.getItem('token');
-            const n = await AsyncStorage.getItem('nome');
-            setToken(t || "");
-            setNome(n || "");
-        };
-        loadUser();
-    }, []);
-
-    useEffect(() => {
-        carregarProdutos();
-    }, [isFocused, route.params?.refresh]);
-
+    // Carrega todos os produtos da API
     const carregarProdutos = async () => {
         setLoading(true);
         try {
             const produtosApi = await produtoService.listarProdutos();
             setProdutos(produtosApi || []);
+            setProdutosOriginais(produtosApi || []); // mantém cópia original
         } catch (error) {
             console.error("Erro ao carregar produtos:", error);
             setProdutos([]);
+            setProdutosOriginais([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleLogout = async () => {
-        await AsyncStorage.clear();
-        navigation.reset({
-            index: 0,
-            routes: [{ name: "Login" }],
-        });
+    // Filtra produtos localmente por nome ou marca
+    const handleBuscarProdutos = (texto) => {
+        if (!texto) {
+            setProdutos(produtosOriginais); // mostra todos se busca vazia
+        } else {
+            const filtrados = produtosOriginais.filter(p =>
+                p.nome.toLowerCase().includes(texto.toLowerCase()) ||
+                (p.marca && p.marca.toLowerCase().includes(texto.toLowerCase()))
+            );
+            setProdutos(filtrados);
+        }
     };
+
+    useEffect(() => {
+        carregarProdutos();
+    }, [isFocused, route.params?.refresh]);
 
     return (
         <ScrollView
-            refreshControl={
-                <RefreshControl refreshing={loading} onRefresh={carregarProdutos} />
-            }
+            refreshControl={<RefreshControl refreshing={loading} onRefresh={carregarProdutos} />}
         >
-            <Header />
+            <Header onSearch={handleBuscarProdutos} />
             <View style={styles.container}>
                 <Marcas />
                 <Marcas />
                 <Marcas />
             </View>
-
             <Text style={styles.titulo}>Explore Nosso Catálogo</Text>
-
             <View style={styles.produtos}>
                 {produtos.length === 0 ? (
                     <Text style={{ color: colors.black, width: '100%', textAlign: 'center' }}>
                         Nenhum produto encontrado
                     </Text>
                 ) : (
-                    produtos.map((item) => (
+                    produtos.map(item => (
                         <Produto
                             key={item.id_produto}
                             nome={item.nome}
@@ -93,9 +76,9 @@ const HomeScreens = ({ navigation }) => {
                     ))
                 )}
             </View>
-
-            <Button title="Sair" onPress={handleLogout} />
+            <View style={styles.fot}>
             <Footer />
+            </View>
         </ScrollView>
     );
 };
@@ -126,6 +109,9 @@ const styles = StyleSheet.create({
         rowGap: 10,
         marginVertical: 20,
     },
+    fot:{
+        marginTop: 200,
+    }
 });
 
 export default HomeScreens;
