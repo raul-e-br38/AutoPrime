@@ -1,44 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useIsFocused, useRoute } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import colors from "../design/colors";
 import Produto from '../components/Produto';
 import produtoService from '../services/produtoService';
 import Marcas from '../components/Marcas';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Toast from 'react-native-toast-message';
-import { useNavigation } from '@react-navigation/native';
-import ProdutoScreen from "./ProdutoScreen";
 
 const HomeScreens = () => {
     const [produtos, setProdutos] = useState([]);
-    const [produtosOriginais, setProdutosOriginais] = useState([]);
+    const [produtosOriginais, setProdutosOriginais] = useState([]); // todos os produtos
     const [loading, setLoading] = useState(false);
     const isFocused = useIsFocused();
     const route = useRoute();
-    const navigation = useNavigation();
 
+    // Carrega todos os produtos da API
     const carregarProdutos = async () => {
         setLoading(true);
         try {
             const produtosApi = await produtoService.listarProdutos();
             setProdutos(produtosApi || []);
-            setProdutosOriginais(produtosApi || []);
+            setProdutosOriginais(produtosApi || []); // mantém cópia original
         } catch (error) {
             console.error("Erro ao carregar produtos:", error);
             setProdutos([]);
             setProdutosOriginais([]);
-            Toast.show({ type: 'error', text1: 'Erro', text2: 'Falha ao carregar produtos 😢' });
         } finally {
             setLoading(false);
         }
     };
 
+    // Filtra produtos localmente por nome ou marca
     const handleBuscarProdutos = (texto) => {
         if (!texto) {
-            setProdutos(produtosOriginais);
+            setProdutos(produtosOriginais); // mostra todos se busca vazia
         } else {
             const filtrados = produtosOriginais.filter(p =>
                 p.nome.toLowerCase().includes(texto.toLowerCase()) ||
@@ -48,9 +46,14 @@ const HomeScreens = () => {
         }
     };
 
+    useEffect(() => {
+        carregarProdutos();
+    }, [isFocused, route.params?.refresh]);
 
     return (
-        <ScrollView refreshControl={<RefreshControl refreshing={loading} onRefresh={carregarProdutos} />}>
+        <ScrollView
+            refreshControl={<RefreshControl refreshing={loading} onRefresh={carregarProdutos} />}
+        >
             <Header onSearch={handleBuscarProdutos} />
             <View style={styles.container}>
                 <Marcas />
@@ -70,20 +73,17 @@ const HomeScreens = () => {
                             nome={item.nome}
                             preco={parseFloat(item.preco)}
                             imagem={`http://192.168.1.119:5000/${item.imagem.replace(/\\/g, '/')}`}
-                            navigation={navigation}
                             descricao={item.descricao}
-                            produto={item}
                         />
                     ))
                 )}
             </View>
             <View style={styles.fot}>
-                <Footer />
+            <Footer />
             </View>
         </ScrollView>
     );
 };
-
 
 const styles = StyleSheet.create({
     container: {

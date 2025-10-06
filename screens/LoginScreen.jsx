@@ -1,64 +1,49 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity, Alert } from 'react-native';
 import Input from '../components/Input';
 import BtnEnviar from '../components/BtnEnviar';
 import colors from "../design/colors";
 import { login } from "../services/autenticacaoService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Toast from 'react-native-toast-message'; // <--- novo
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
 
     const handleLogin = async () => {
+        console.log("EMAIL:", email, "SENHA:", senha); // Debug!
         try {
             if (!email || !senha) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Erro',
-                    text2: 'Preencha email e senha 😤',
-                });
+                Alert.alert("Erro", "Preencha email e senha");
                 return;
             }
 
             const userData = await login(email, senha);
+            console.log("LOGIN DATA RECEBIDA:", userData);
 
             if (userData.error) {
-                Toast.show({ type: 'error', text1: 'Erro', text2: userData.error });
+                Alert.alert("Erro", userData.error);
                 return;
             }
 
             if (!userData.token) {
-                Toast.show({ type: 'error', text1: 'Erro', text2: 'Token não recebido do servidor' });
+                Alert.alert("Erro", "Token não recebido do servidor");
                 return;
             }
 
             await AsyncStorage.setItem("token", userData.token);
             await AsyncStorage.setItem("nome", userData.nome);
+            console.log("TOKEN E NOME SALVOS:", userData.token, userData.nome);
 
-            Toast.show({
-                type: 'success',
-                text1: `Bem-vindo, ${userData.nome}! `,
-                text2: 'Login realizado com sucesso.',
-            });
+            Alert.alert("Sucesso", `Bem-vindo, ${userData.nome}`);
 
             navigation.reset({
                 index: 0,
                 routes: [{ name: "Home" }],
             });
         } catch (error) {
-            let errorMsg = error.message;
-            if (errorMsg && errorMsg.includes("Network request failed")) {
-                errorMsg = "Erro Interno, Tente Novamente";
-            } else {
-                errorMsg = errorMsg || 'Erro ao fazer login 😢';
-            }
-            Toast.show({
-                type: 'error',
-                text1: 'Erro',
-                text2: errorMsg,
-            });
+            console.log("ERRO LOGIN HANDLE:", error);
+            Alert.alert("Erro", error.message || "Erro ao fazer login");
         }
     };
 
@@ -101,7 +86,6 @@ export default function LoginScreen({ navigation }) {
         </ImageBackground>
     );
 }
-
 
 const styles = StyleSheet.create({
     fundo: {

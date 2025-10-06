@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity, Alert, ScrollView, TextInput } from 'react-native';
 import BtnEnviar from '../components/BtnEnviar';
 import colors from "../design/colors";
 import { cadastro } from "../services/autenticacaoService";
 import RNPickerSelect from "react-native-picker-select";
-import Toast from 'react-native-toast-message'; // <-- Toast
 
+// Função de validação de senha
 function validarSenha(senha) {
     const requisitos = {
         minLength: senha.length >= 8,
@@ -27,6 +27,7 @@ export default function CadastroScreen({ navigation }) {
     const [senha, setSenha] = useState("");
     const [erroSenha, setErroSenha] = useState("");
 
+    // Validação em tempo real
     const handleSenhaChange = (text) => {
         setSenha(text);
         if (text.length > 0) {
@@ -42,38 +43,48 @@ export default function CadastroScreen({ navigation }) {
     };
 
     const handleCadastro = async () => {
+        console.log("VALORES PREENCHIDOS:", {
+            nome: nome,
+            email: email,
+            cargo: cargo,
+            senha: senha,
+            nomeLength: nome.length,
+            nomeTrimLength: nome.trim().length
+        });
+
+        // Validação simplificada para teste
         if (!nome || nome.trim().length === 0) {
-            Toast.show({ type: 'error', text1: 'Erro', text2: 'Por favor, preencha o nome.' });
+            Alert.alert("Erro", "Por favor, preencha o nome.");
             return;
         }
 
         if (!email || email.trim().length === 0) {
-            Toast.show({ type: 'error', text1: 'Erro', text2: 'Por favor, preencha o email.' });
+            Alert.alert("Erro", "Por favor, preencha o email.");
             return;
         }
 
         if (!cargo) {
-            Toast.show({ type: 'error', text1: 'Erro', text2: 'Por favor, selecione um cargo.' });
+            Alert.alert("Erro", "Por favor, selecione um cargo.");
             return;
         }
 
         if (!senha || senha.trim().length === 0) {
-            Toast.show({ type: 'error', text1: 'Erro', text2: 'Por favor, preencha a senha.' });
+            Alert.alert("Erro", "Por favor, preencha a senha.");
             return;
         }
 
         const validacao = validarSenha(senha);
         if (!validacao.valida) {
-            Toast.show({ type: 'error', text1: 'Erro na Senha', text2: 'A senha deve ter 8 caracteres, maiúscula, número e caractere especial.' });
+            Alert.alert("Erro na Senha", "A senha deve ter pelo menos 8 caracteres, uma letra maiúscula, um número e um caractere especial.");
             return;
         }
 
         try {
             const res = await cadastro(nome, email, cargo, senha);
-            Toast.show({ type: 'success', text1: 'Sucesso!', text2: res.mensagem });
+            Alert.alert("Sucesso", res.mensagem);
             navigation.navigate("Login");
         } catch (error) {
-            Toast.show({ type: 'error', text1: 'Erro', text2: error.message });
+            Alert.alert("Erro", error.message);
         }
     };
 
@@ -87,6 +98,7 @@ export default function CadastroScreen({ navigation }) {
                 <View style={styles.container}>
                     <Text style={styles.text}>Cadastre-se</Text>
 
+                    {/* Input de Nome DIRETO (sem componente customizado) */}
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
@@ -98,6 +110,7 @@ export default function CadastroScreen({ navigation }) {
                         />
                     </View>
 
+                    {/* Input de Email DIRETO */}
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
@@ -110,6 +123,7 @@ export default function CadastroScreen({ navigation }) {
                         />
                     </View>
 
+                    {/* SELECT de CARGO */}
                     <View style={styles.pickerContainer}>
                         <RNPickerSelect
                             onValueChange={(value) => setCargo(value)}
@@ -117,13 +131,17 @@ export default function CadastroScreen({ navigation }) {
                                 { label: "Vendedor", value: "Vendedor" },
                                 { label: "Cliente", value: "Cliente" },
                             ]}
-                            placeholder={{ label: "Selecione seu cargo...", value: null }}
+                            placeholder={{
+                                label: "Selecione seu cargo...",
+                                value: null
+                            }}
                             style={pickerSelectStyles}
                             value={cargo}
                             useNativeAndroidPickerStyle={false}
                         />
                     </View>
 
+                    {/* Input de Senha DIRETO */}
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
@@ -135,10 +153,13 @@ export default function CadastroScreen({ navigation }) {
                         />
                     </View>
 
-                    {erroSenha ? <Text style={styles.erroTexto}>{erroSenha}</Text> : null}
+                    {erroSenha ? (
+                        <Text style={styles.erroTexto}>{erroSenha}</Text>
+                    ) : null}
 
                     <Text style={styles.termos}>
-                        Ao continuar você concorda com nossos <Text style={styles.bold}>Termos de Política e Privacidade</Text>
+                        Ao continuar você concorda com nossos{" "}
+                        <Text style={styles.bold}>Termos de Política e Privacidade</Text>
                     </Text>
 
                     <View style={styles.cadastroContainer}>
@@ -149,9 +170,14 @@ export default function CadastroScreen({ navigation }) {
                     </View>
 
                     <BtnEnviar onPress={handleCadastro} title="Cadastrar-se" />
+
+
                 </View>
 
-                <Image source={require("../assets/logo.png")} style={styles.logo} />
+                <Image
+                    source={require("../assets/logo.png")}
+                    style={styles.logo}
+                />
             </ScrollView>
         </ImageBackground>
     );
