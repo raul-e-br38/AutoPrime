@@ -4,8 +4,7 @@ import { useNavigation } from '@react-navigation/native'; // <-- Importando o ho
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import colors from "../design/colors";
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Verifique se o AsyncStorage está importado corretamente
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const PerfilScreen = () => {
     const navigation = useNavigation(); // <-- Usando o hook useNavigation para obter a navegação
 
