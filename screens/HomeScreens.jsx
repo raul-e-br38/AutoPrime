@@ -60,9 +60,9 @@ const HomeScreens = () => {
             <Text style={styles.titulo}>Explore Nosso Catálogo</Text>
             <View style={styles.produtos}>
                 {produtos.length === 0 ? (
-                    <Text style={{ color: colors.black, width: '100%', textAlign: 'center' }}>
-                        Nenhum produto encontrado
-                    </Text>
+                            <Text style={{ color: colors.black, width: '100%', textAlign: 'center', }}>
+                                Nenhum produto encontrado
+                            </Text>
                 ) : (
                     produtos.map(item => (
                         <Produto

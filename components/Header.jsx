@@ -16,12 +16,14 @@ export default function Header({ onSearch }) {
     const perfil = () => {
         navigation.navigate('Perfil');
     };
-
+    const home = () => {
+        navigation.navigate('Home');
+    };
     return (
         <View>
             <View style={styles.preto}><Text></Text></View>
             <View style={styles.container}>
-                <Image style={styles.logo} source={require('../assets/logo.png')} />
+                <TouchableOpacity onPress={home}><Image style={styles.logo} source={require('../assets/logo.png')} /></TouchableOpacity>
                 <View style={styles.search}>
                     <TextInput
                         style={styles.searchInput}
