@@ -5,9 +5,6 @@ import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native
 // Importa componentes do React Native, como 'View', 'Text', 'StyleSheet', 'ScrollView' e 'RefreshControl', que são usados para construção da interface do usuário e interação com ela.
 
 import { useIsFocused, useRoute } from '@react-navigation/native';
-// Importa hooks do React Navigation:
-// 'useIsFocused' verifica se a tela está em foco.
-// 'useRoute' permite acessar informações sobre a rota atual, como parâmetros passados entre telas.
 
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -23,16 +20,14 @@ import produtoService from '../services/produtoService';
 // Importa o serviço 'produtoService', que contém funções para interagir com a API e obter dados sobre produtos.
 
 import Marcas from '../components/Marcas';
-// Importa o componente 'Marcas'.
+
 
 const HomeScreens = () => {
     // Declaração do componente funcional 'HomeScreens' que representa a tela inicial do aplicativo.
 
     const [produtos, setProdutos] = useState([]);
-    // 'produtos' é o estado que armazena os produtos a serem exibidos na tela. 'setProdutos' é a função para atualizar esse estado.
 
-    const [produtosOriginais, setProdutosOriginais] = useState([]);
-    // 'produtosOriginais' armazena todos os produtos recebidos da API, incluindo os que não foram filtrados.
+    const [produtosOriginais, setProdutosOriginais] = useState([]); // todos os produtos
 
     const [loading, setLoading] = useState(false);
     // 'loading' é um estado que indica se os produtos estão sendo carregados (em requisição).
@@ -41,8 +36,8 @@ const HomeScreens = () => {
     // 'isFocused' é um hook que verifica se a tela está em foco (visível para o usuário).
 
     const route = useRoute();
-    // 'route' acessa informações da rota atual, como parâmetros enviados entre telas.
 
+    // Carrega todos os produtos da API
     const carregarProdutos = async () => {
         // Função assíncrona para carregar os produtos da API.
 
@@ -54,10 +49,9 @@ const HomeScreens = () => {
             // Chama o serviço 'produtoService.listarProdutos' para buscar a lista de produtos da API.
 
             setProdutos(produtosApi || []);
-            // Atualiza o estado 'produtos' com a lista de produtos retornada pela API ou um array vazio caso a API não retorne produtos.
 
-            setProdutosOriginais(produtosApi || []);
-            // Atualiza o estado 'produtosOriginais' com a lista de produtos da API (copia a lista para permitir filtragem posterior).
+            setProdutosOriginais(produtosApi || []); // mantém cópia original
+
         } catch (error) {
             console.error("Erro ao carregar produtos:", error);
             // Se ocorrer algum erro ao buscar os produtos, ele será capturado e impresso no console.
@@ -65,19 +59,19 @@ const HomeScreens = () => {
             setProdutos([]);
             // Limpa o estado 'produtos' em caso de erro.
             setProdutosOriginais([]);
-            // Limpa o estado 'produtosOriginais' também em caso de erro.
+
         } finally {
             setLoading(false);
             // Independentemente de ter ocorrido erro ou não, o estado 'loading' é definido como falso, indicando que o carregamento terminou.
         }
     };
 
+    // Filtra produtos localmente por nome ou marca
     const handleBuscarProdutos = (texto) => {
         // Função para filtrar os produtos com base no texto fornecido na busca (nome ou marca).
 
         if (!texto) {
             setProdutos(produtosOriginais);
-            // Se o texto de busca estiver vazio, exibe todos os produtos (volta para a lista original).
         } else {
             const filtrados = produtosOriginais.filter(p =>
                 p.nome.toLowerCase().includes(texto.toLowerCase()) ||
@@ -92,8 +86,6 @@ const HomeScreens = () => {
     useEffect(() => {
         carregarProdutos();
     }, [isFocused, route.params?.refresh]);
-    // 'useEffect' é chamado toda vez que a tela for focada ou o parâmetro 'refresh' da rota for alterado.
-    // Isso garante que os produtos sejam recarregados quando o usuário voltar para a tela.
 
     return (
         <ScrollView
@@ -122,6 +114,7 @@ const HomeScreens = () => {
                             nome={item.nome}
                             preco={parseFloat(item.preco)}
                             imagem={`http://192.168.1.117:5000/${item.imagem.replace(/\\/g, '/')}`}
+
                             descricao={item.descricao}
                         />
                     ))
@@ -129,7 +122,7 @@ const HomeScreens = () => {
             </View>
 
             <View style={styles.fot}>
-                <Footer />
+            <Footer />
             </View>
         </ScrollView>
     );
