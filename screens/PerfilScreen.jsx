@@ -26,7 +26,9 @@ const PerfilScreen = () => {
                     <Text style={styles.sairTxt}>Sair</Text>
                 </TouchableOpacity>
             </View>
+            <View style={{marginTop:520}} >
             <Footer />
+            </View>
         </ScrollView>
     );
 };

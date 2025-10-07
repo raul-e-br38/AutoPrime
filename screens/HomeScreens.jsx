@@ -1,75 +1,39 @@
 import React, { useEffect, useState } from 'react';
-// Importa os hooks 'useEffect' e 'useState' do React para gerenciar o estado e os efeitos colaterais (efeitos de ciclo de vida).
-
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
-// Importa componentes do React Native, como 'View', 'Text', 'StyleSheet', 'ScrollView' e 'RefreshControl', que são usados para construção da interface do usuário e interação com ela.
-
 import { useIsFocused, useRoute } from '@react-navigation/native';
-
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-// Importa os componentes personalizados 'Header' e 'Footer', que representam o cabeçalho e rodapé da tela.
-
 import colors from "../design/colors";
-// Importa o arquivo de cores, onde estão definidas as cores usadas no aplicativo.
-
 import Produto from '../components/Produto';
-// Importa o componente 'Produto', usado para renderizar cada item de produto na tela.
-
 import produtoService from '../services/produtoService';
-// Importa o serviço 'produtoService', que contém funções para interagir com a API e obter dados sobre produtos.
-
 import Marcas from '../components/Marcas';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message'; // <-- Toast
 
 const HomeScreens = () => {
-    // Declaração do componente funcional 'HomeScreens' que representa a tela inicial do aplicativo.
-
     const [produtos, setProdutos] = useState([]);
-
-    const [produtosOriginais, setProdutosOriginais] = useState([]); // todos os produtos
-
+    const [produtosOriginais, setProdutosOriginais] = useState([]);
     const [loading, setLoading] = useState(false);
-    // 'loading' é um estado que indica se os produtos estão sendo carregados (em requisição).
-
     const isFocused = useIsFocused();
-    // 'isFocused' é um hook que verifica se a tela está em foco (visível para o usuário).
-
     const route = useRoute();
 
-    // Carrega todos os produtos da API
     const carregarProdutos = async () => {
-        // Função assíncrona para carregar os produtos da API.
-
         setLoading(true);
-        // Define o estado 'loading' como verdadeiro para indicar que os produtos estão sendo carregados.
-
         try {
             const produtosApi = await produtoService.listarProdutos();
-            // Chama o serviço 'produtoService.listarProdutos' para buscar a lista de produtos da API.
-
             setProdutos(produtosApi || []);
-
-            setProdutosOriginais(produtosApi || []); // mantém cópia original
-
+            setProdutosOriginais(produtosApi || []);
         } catch (error) {
             console.error("Erro ao carregar produtos:", error);
-            // Se ocorrer algum erro ao buscar os produtos, ele será capturado e impresso no console.
-
             setProdutos([]);
-            // Limpa o estado 'produtos' em caso de erro.
             setProdutosOriginais([]);
-
+            Toast.show({ type: 'error', text1: 'Erro', text2: 'Falha ao carregar produtos 😢' });
         } finally {
             setLoading(false);
-            // Independentemente de ter ocorrido erro ou não, o estado 'loading' é definido como falso, indicando que o carregamento terminou.
         }
     };
 
-    // Filtra produtos localmente por nome ou marca
     const handleBuscarProdutos = (texto) => {
-        // Função para filtrar os produtos com base no texto fornecido na busca (nome ou marca).
-
         if (!texto) {
             setProdutos(produtosOriginais);
         } else {
@@ -77,34 +41,22 @@ const HomeScreens = () => {
                 p.nome.toLowerCase().includes(texto.toLowerCase()) ||
                 (p.marca && p.marca.toLowerCase().includes(texto.toLowerCase()))
             );
-            // Filtra os produtos com base no nome ou marca que contém o texto de busca (ignorando maiúsculas/minúsculas).
             setProdutos(filtrados);
-            // Atualiza o estado 'produtos' com os produtos filtrados.
         }
     };
 
-    useEffect(() => {
-        carregarProdutos();
-    }, [isFocused, route.params?.refresh]);
-
     return (
-        <ScrollView
-            refreshControl={<RefreshControl refreshing={loading} onRefresh={carregarProdutos} />}
-        >
-
+        <ScrollView refreshControl={<RefreshControl refreshing={loading} onRefresh={carregarProdutos} />}>
             <Header onSearch={handleBuscarProdutos} />
-
             <View style={styles.container}>
                 <Marcas />
                 <Marcas />
                 <Marcas />
             </View>
-
             <Text style={styles.titulo}>Explore Nosso Catálogo</Text>
-
             <View style={styles.produtos}>
                 {produtos.length === 0 ? (
-                    <Text style={{ color: colors.black, width: '100%', textAlign: 'center', }}>
+                    <Text style={{ color: colors.black, width: '100%', textAlign: 'center' }}>
                         Nenhum produto encontrado
                     </Text>
                 ) : (
@@ -113,20 +65,19 @@ const HomeScreens = () => {
                             key={item.id_produto}
                             nome={item.nome}
                             preco={parseFloat(item.preco)}
-                            imagem={`http://192.168.1.117:5000/${item.imagem.replace(/\\/g, '/')}`}
-
+                            imagem={`http://192.168.1.119:5000/${item.imagem.replace(/\\/g, '/')}`}
                             descricao={item.descricao}
                         />
                     ))
                 )}
             </View>
-
             <View style={styles.fot}>
-            <Footer />
+                <Footer />
             </View>
         </ScrollView>
     );
 };
+
 
 const styles = StyleSheet.create({
     container: {
@@ -155,7 +106,7 @@ const styles = StyleSheet.create({
         marginVertical: 20,
     },
     fot: {
-        marginTop: 200,
+        marginTop: 280,
     },
 });
 

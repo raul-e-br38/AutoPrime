@@ -3,8 +3,11 @@ import { TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
 import colors from "../design/colors";
 
 export default function Produto({ nome, preco, imagem, descricao }) {
+    const comprar = () => {
+        navigation.navigate('Produto');
+    };
     return (
-        <TouchableOpacity style={styles.produto}>
+        <TouchableOpacity style={styles.produto} onPress={comprar}>
             <Image style={styles.foto} source={{ uri: imagem }} />
             <Text style={styles.nome}>{nome}</Text>
             <Text style={styles.preco}>R${preco.toFixed(2)}</Text>

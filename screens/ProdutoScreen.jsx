@@ -28,8 +28,12 @@ export default function ProdutoScreen() {
 
     if (!produto) {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text>Produto não encontrado.</Text>
+            <View>
+                <Header/>
+                <View style={{alignItems: 'center', justifyContent: 'center'}}>
+                    <Text style={{marginBottom: 500, marginTop: 100}}>Produto não encontrado.</Text>
+                </View>
+                <Footer/>
             </View>
         );
         // Se o produto não for encontrado, exibe uma mensagem indicando que o produto não foi encontrado,
@@ -81,6 +85,7 @@ const styles = StyleSheet.create({
     },
     descricao: {
         marginTop: 16,
+        marginBottom: 100,
     },
     carrinho: {
         alignItems: 'center',
