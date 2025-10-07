@@ -22,7 +22,14 @@ export default function Produto({ nome, preco, imagem, descricao }) {
 
     return (
         <TouchableOpacity style={styles.produto} onPress={comprar}>
-            <Image style={styles.foto} source={{ uri: imagem }} />
+            <Image
+                style={styles.foto}
+                source={{
+                    uri: imagem
+                        ? `http://192.168.1.117:5000/static/imagens/produto/${imagem}`
+                        : 'https://via.placeholder.com/200x200.png?text=Sem+Imagem',
+                }}
+            />
             <Text style={styles.nome}>{nome}</Text>
             <Text style={styles.preco}>R${preco.toFixed(2)}</Text>
         </TouchableOpacity>

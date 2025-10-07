@@ -4,7 +4,7 @@ import BtnEnviar from '../components/BtnEnviar';
 import colors from "../design/colors";
 import { cadastro } from "../services/autenticacaoService";
 import RNPickerSelect from "react-native-picker-select";
-import Toast from 'react-native-toast-message'; // <-- Toast
+import Toast from 'react-native-toast-message';
 
 function validarSenha(senha) {
     const requisitos = {

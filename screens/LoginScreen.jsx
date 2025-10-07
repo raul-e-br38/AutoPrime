@@ -23,7 +23,7 @@ export default function LoginScreen({ navigation }) {
                 Toast.show({
                     type: 'error',
                     text1: 'Erro',
-                    text2: 'Preencha email e senha 😤',
+                    text2: 'Preencha email e senha ',
                 });
                 return;
             }

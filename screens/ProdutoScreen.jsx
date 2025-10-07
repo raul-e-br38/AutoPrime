@@ -42,9 +42,14 @@ export default function ProdutoScreen() {
             <Header/>
 
             <Image
-                style={{ width: 200, height: 200, alignSelf: 'center' }}
-                source={{ uri: produto.imagem }}
+                style={styles.imagem}
+                source={{
+                    uri: produto.imagem
+                        ? `http://192.168.1.117:5000/static/imagens/produto/${produto.imagem}`
+                        : 'https://via.placeholder.com/200x200.png?text=Sem+Imagem',
+                }}
             />
+
 
 
             <Text style={styles.nome}>{produto.nome}</Text>

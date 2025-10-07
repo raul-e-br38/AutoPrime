@@ -22,7 +22,7 @@ async function listarProdutos() {
             // Se a resposta não for OK, lança um erro.
             // O erro lançado terá a mensagem 'data.error' (se existir) ou 'Erro ao buscar produtos' como mensagem padrão.
         }
-
+        console.log(" Produtos recebidos da API:", data);
         return data.produtos || [];
         // Retorna a lista de produtos que vem da resposta (data.produtos).
         // Caso a chave 'produtos' não exista ou esteja vazia, retorna um array vazio.
