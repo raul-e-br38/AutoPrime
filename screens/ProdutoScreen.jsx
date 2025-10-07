@@ -1,22 +1,16 @@
 import React from 'react';
 // Importa o React para usar os recursos do React, como componentes e hooks.
-
 import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 // Importa componentes do React Native para a construção da interface, como 'View', 'Text', 'StyleSheet', 'ScrollView', e 'Image'.
-
 import { useRoute } from '@react-navigation/native';
 // Importa o hook 'useRoute' do React Navigation, usado para acessar os parâmetros da rota atual (dados passados entre telas).
-
 import colors from "../design/colors";
 // Importa um arquivo de cores para manter a consistência das cores ao longo do aplicativo.
-
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 // Importa os componentes 'Header' e 'Footer', que são usados para exibir o cabeçalho e o rodapé na tela.
-
 import BtnEnviar from "../components/BtnEnviar";
 // Importa o componente 'BtnEnviar', que é um botão usado para interagir com o produto, como adicionar ao carrinho.
-
 export default function ProdutoScreen() {
     // Declara o componente funcional 'ProdutoScreen', que exibe os detalhes de um produto.
 
@@ -31,7 +25,7 @@ export default function ProdutoScreen() {
             <View>
                 <Header/>
                 <View style={{alignItems: 'center', justifyContent: 'center'}}>
-                    <Text style={{marginBottom: 500, marginTop: 100}}>Produto não encontrado.</Text>
+                    <Text style={{marginBottom: 600, marginTop: 100}}>Produto não encontrado.</Text>
                 </View>
                 <Footer/>
             </View>
@@ -49,8 +43,9 @@ export default function ProdutoScreen() {
 
             <Image
                 style={{ width: 200, height: 200, alignSelf: 'center' }}
-                source={{ uri: produto.imagemUrl }}
+                source={{ uri: produto.imagem }}
             />
+
 
             <Text style={styles.nome}>{produto.nome}</Text>
 
@@ -85,7 +80,7 @@ const styles = StyleSheet.create({
     },
     descricao: {
         marginTop: 16,
-        marginBottom: 100,
+        marginBottom: 230,
     },
     carrinho: {
         alignItems: 'center',

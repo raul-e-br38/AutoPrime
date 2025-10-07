@@ -61,10 +61,16 @@ export default function LoginScreen({ navigation }) {
                 routes: [{ name: "Home" }],
             });
         } catch (error) {
+            let mensagemErro = 'Erro ao fazer login, tente novamente.';
+
+            if (error.message && error.message.includes('Network request failed')) {
+                mensagemErro = 'Erro de conexão.Tente novamente.';
+            }
+
             Toast.show({
                 type: 'error',
                 text1: 'Erro',
-                text2: error.message || 'Erro ao fazer login 😢',
+                text2: mensagemErro,
             });
         }
     };
