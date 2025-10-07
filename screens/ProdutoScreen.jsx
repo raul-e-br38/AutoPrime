@@ -40,7 +40,7 @@ export default function ProdutoScreen() {
         <ScrollView>
 
             <Header/>
-
+            <View>
             <Image
                 style={styles.imagem}
                 source={{
@@ -49,7 +49,7 @@ export default function ProdutoScreen() {
                         : 'https://via.placeholder.com/200x200.png?text=Sem+Imagem',
                 }}
             />
-
+            </View>
 
 
             <Text style={styles.nome}>{produto.nome}</Text>
@@ -69,8 +69,8 @@ export default function ProdutoScreen() {
 
 const styles = StyleSheet.create({
     imagem: {
-        width: '80%',
-        padding: 40,
+        alignSelf: 'center',
+        padding:200,
     },
     nome: {
         fontSize: 24,

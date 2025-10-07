@@ -77,7 +77,7 @@ const HomeScreens = () => { // componente funcional principal desta tela (Home)
                             nome={item.nome}
                             preco={parseFloat(item.preco)}
                             descricao={item.descricao}
-                            imagem={`http://192.168.1.117:5000/static/imagens/produto/${item.imagem}`}
+                            imagem={item.imagem}
                         />
 
                     ))
