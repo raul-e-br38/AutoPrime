@@ -12,12 +12,15 @@ export default function LoginScreen({ navigation }) {
 
     const handleLogin = async () => {
         console.log("EMAIL:", email, "SENHA:", senha); // Debug!
-        try {
+        // Bloco "try" para capturar possíveis erros durante o login.
+        try {//verifica se o email ou senha estão vazios
             if (!email || !senha) {
                 Alert.alert("Erro", "Preencha email e senha");
                 return;
             }
 
+            // Chama a função assíncrona "login" enviando email e senha.
+            // Espera a resposta do servidor e armazena em "userData".
             const userData = await login(email, senha);
             console.log("LOGIN DATA RECEBIDA:", userData);
 
@@ -25,17 +28,19 @@ export default function LoginScreen({ navigation }) {
                 Alert.alert("Erro", userData.error);
                 return;
             }
-
+            // Verifica se o servidor não enviou um token de autenticação.
             if (!userData.token) {
                 Alert.alert("Erro", "Token não recebido do servidor");
                 return;
             }
-
+            // Salva o token do usuário no armazenamento local do app (persistência).
             await AsyncStorage.setItem("token", userData.token);
             await AsyncStorage.setItem("nome", userData.nome);
-            console.log("TOKEN E NOME SALVOS:", userData.token, userData.nome);
+            console.log("TOKEN E NOME SALVOS:", userData.token, userData.nome);// Mostra no console os dados salvos
 
             Alert.alert("Sucesso", `Bem-vindo, ${userData.nome}`);
+            // Redefine a pilha de navegação e leva o usuário diretamente para a tela "Home".
+            // Garante que ele não possa voltar para a tela de login pressionando "voltar".
 
             navigation.reset({
                 index: 0,
@@ -49,7 +54,7 @@ export default function LoginScreen({ navigation }) {
 
     return (
         <ImageBackground
-            source={require("../assets/fundoLogin.jpg")}
+            source={require("../assets/fundoLogin.jpg")}//importa o arquivo local
             style={styles.fundo}
             resizeMode="cover"
         >
