@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
         marginVertical: 20,
     },
     fot: {
-        marginTop: 280,
+        marginTop: 200,
     },
 });
 

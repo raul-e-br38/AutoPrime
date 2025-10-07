@@ -27,7 +27,7 @@ const PerfilScreen = () => {
                 </TouchableOpacity>
             </View>
             <View style={{marginTop:520}} >
-            <Footer />
+                <Footer />
             </View>
         </ScrollView>
     );

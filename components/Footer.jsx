@@ -18,6 +18,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginTop: 100,
+    },
+    logo: {
+        width: 80,
+        height: 80,
+        resizeMode: 'contain',
     }
-
 })
