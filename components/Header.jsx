@@ -21,7 +21,7 @@ export default function Header({ onSearch }) {
     };
     return (
         <View>
-            <View style={styles.preto}><Text></Text></View>
+            <View style={styles.preto}><Text>.</Text></View>
             <View style={styles.container}>
                 <TouchableOpacity onPress={home}><Image style={styles.logo} source={require('../assets/logo.png')} /></TouchableOpacity>
                 <View style={styles.search}>
