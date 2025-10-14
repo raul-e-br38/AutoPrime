@@ -1,76 +1,129 @@
-import React, { useEffect, useState } from 'react'; // importa React e os hooks useEffect (efeitos colaterais) e useState (estado local)
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native'; // importa componentes do React Native usados na tela
-import { useIsFocused } from '@react-navigation/native'; // hook que retorna true quando a tela está em foco (útil pra recarregar ao voltar)
-import Header from '../components/Header'; // importa componente Header customizado (provavelmente contém a barra de pesquisa)
-import Footer from '../components/Footer'; // importa componente Footer customizado
-import colors from "../design/colors"; // importa objeto com cores do projeto
-import Produto from '../components/Produto'; // importa componente que exibe cada produto individual
-import produtoService from '../services/produtoService'; // importa serviço/API para listar produtos
-import Marcas from '../components/Marcas'; // importa componente Marcas (provavelmente lista de logos/filtragem)
-import Toast from 'react-native-toast-message'; // importa lib para mostrar notificações em toast
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { useIsFocused, useRoute } from '@react-navigation/native';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import Produto from '../components/Produto';
+import Marcas from '../components/Marcas';
+import colors from "../design/colors";
+import produtoService from '../services/produtoService';
+import Toast from 'react-native-toast-message';
 
-const HomeScreens = () => { // componente funcional principal desta tela (Home)
-    const [produtos, setProdutos] = useState([]); // estado que guarda os produtos exibidos (pode ser filtrado)
-    const [produtosOriginais, setProdutosOriginais] = useState([]); // estado que guarda a lista original (sem filtro)
-    const [loading, setLoading] = useState(false); // estado que indica se está carregando (usado no RefreshControl)
-    const isFocused = useIsFocused(); // verifica se a tela está em foco (true/false)
+const HomeScreens = () => {
+    // Estado para armazenar os produtos exibidos na tela
+    const [produtos, setProdutos] = useState([]);
+    // Estado para armazenar a lista completa original (para restaurar após filtro)
+    const [produtosOriginais, setProdutosOriginais] = useState([]);
+    // Estado que controla o loading/pull-to-refresh
+    const [loading, setLoading] = useState(false);
+    // Estado para armazenar erros ocorridos ao carregar produtos
+    const [erro, setErro] = useState(null);
 
-    useEffect(() => { // efeito que roda quando o componente monta e quando isFocused muda
-        carregarProdutos(); // chama a função que busca os produtos na API
-    }, [isFocused]); // dependência: sempre que a tela voltar ao foco, recarrega os produtos
+    // Hook que retorna true quando a tela está em foco
+    const isFocused = useIsFocused();
+    // Hook para acessar parâmetros da navegação
+    const route = useRoute();
 
-    const carregarProdutos = async () => { // função assíncrona que busca produtos do backend
-        setLoading(true); // indica início do carregamento (RefreshControl usa esse estado)
+    // useEffect que dispara ao montar a tela ou quando ela volta ao foco
+    useEffect(() => {
+        carregarProdutos(); // Carrega os produtos da API
+    }, [isFocused]);
+
+    // useEffect que dispara quando o parâmetro searchQuery muda (vindo da navegação)
+    useEffect(() => {
+        if (route.params?.searchQuery) {
+            handleBuscarProdutos(route.params.searchQuery); // Filtra produtos com base na busca
+        }
+    }, [route.params?.searchQuery]);
+
+    // Função para buscar produtos da API
+    const carregarProdutos = async () => {
+        setLoading(true); // Ativa o loading
+        setErro(null);    // Reseta erro antes da requisição
         try {
-            const produtosApi = await produtoService.listarProdutos(); // chama o serviço que retorna a lista de produtos
-            setProdutos(produtosApi || []); // atualiza produtos exibidos (proteção caso venha undefined/null)
-            setProdutosOriginais(produtosApi || []); // mantém uma cópia original para filtrar depois
+            // Chama o service que retorna a lista de produtos
+            const produtosApi = await produtoService.listarProdutos();
+
+            // Atualiza estados com a lista retornada ou array vazio se não houver
+            setProdutos(produtosApi || []);
+            setProdutosOriginais(produtosApi || []);
         } catch (error) {
-            console.error("Erro ao carregar produtos:", error); // log de erro no console durante desenvolvimento
-            Toast.show({ // mostra um toast de erro amigável pro usuário
-                type: 'error',
-                text1: 'Erro ao carregar produtos',
-                text2: 'Tente novamente mais tarde '
-            });
+            // Loga erro no console
+            console.error("Erro ao carregar produtos:", error);
+
+            // Salva o erro no estado para disparar toast
+            setErro(error);
+
+            // Fallback: lista de produtos vazia para não quebrar a tela
+            setProdutos([]);
         } finally {
-            setLoading(false); // garante que o loading será desligado independente do resultado
+            // Desativa loading independentemente do sucesso ou erro
+            setLoading(false);
         }
     };
 
-    const handleBuscarProdutos = (texto) => { // função que trata o texto da busca (passada ao Header)
-        if (!texto) { // se campo de busca vazio
-            setProdutos(produtosOriginais); // restaura a lista original (sem filtro)
+    // useEffect que dispara sempre que o estado "erro" muda
+    useEffect(() => {
+        if (erro) {
+            // Mostra toast personalizado na tela
+            Toast.show({
+                type: 'error', // Tipo de mensagem
+                text1: 'Erro ao carregar produtos', // Título do toast
+                text2: erro.message.includes('Network request failed')
+                    ? 'Verifique sua conexão com a internet.' // Mensagem para erro de rede
+                    : 'Tente novamente mais tarde',           // Mensagem genérica para outros erros
+                position: 'top',      // Toast aparece no topo da tela
+                visibilityTime: 3000, // Duração em ms
+                autoHide: true,       // Desaparece sozinho
+            });
+        }
+    }, [erro]);
+
+    // Função para filtrar produtos com base no texto da busca
+    const handleBuscarProdutos = (texto) => {
+        if (!texto) {
+            // Se busca vazia, restaura a lista original
+            setProdutos(produtosOriginais);
         } else {
+            // Filtra produtos pelo nome ou marca que contenham o texto
             const filtrados = produtosOriginais.filter(p =>
-                p.nome.toLowerCase().includes(texto.toLowerCase()) || // filtra pelo nome (case-insensitive)
-                (p.marca && p.marca.toLowerCase().includes(texto.toLowerCase())) // também filtra por marca, se existir
+                p.nome.toLowerCase().includes(texto.toLowerCase()) ||
+                (p.marca && p.marca.toLowerCase().includes(texto.toLowerCase()))
             );
-            setProdutos(filtrados); // seta a lista filtrada para exibição
+            setProdutos(filtrados); // Atualiza estado com produtos filtrados
         }
     };
 
-    return ( // JSX retornado pelo componente
+    // Render da tela
+    return (
         <ScrollView
-            refreshControl={ // componente que habilita pull-to-refresh na ScrollView
-                <RefreshControl refreshing={loading} onRefresh={carregarProdutos} /> // usa loading e chama carregarProdutos
+            // Pull-to-refresh para recarregar produtos
+            refreshControl={
+                <RefreshControl refreshing={loading} onRefresh={carregarProdutos} />
             }
         >
-            <Header onSearch={handleBuscarProdutos} /> {/* Header recebe prop onSearch para buscar produtos */}
+            {/* Header com funcionalidade de pesquisa */}
+            <Header onSearch={handleBuscarProdutos} />
 
+            {/* Seção de marcas */}
             <View style={styles.container}>
                 <Marcas />
                 <Marcas />
                 <Marcas />
             </View>
 
+            {/* Título da seção */}
             <Text style={styles.titulo}>Explore Nosso Catálogo</Text>
 
+            {/* Lista de produtos */}
             <View style={styles.produtos}>
                 {produtos.length === 0 ? (
+                    // Caso não haja produtos
                     <Text style={{ color: colors.black, width: '100%', textAlign: 'center' }}>
                         Nenhum produto encontrado
                     </Text>
                 ) : (
+                    // Mapeia produtos existentes e renderiza componente Produto
                     produtos.map(item => (
                         <Produto
                             key={item.id}
@@ -78,21 +131,21 @@ const HomeScreens = () => { // componente funcional principal desta tela (Home)
                             preco={parseFloat(item.preco)}
                             descricao={item.descricao}
                             imagem={item.imagem}
+                            marca={item.marca}
                         />
-
                     ))
                 )}
             </View>
 
+            {/* Rodapé */}
             <View style={styles.fot}>
                 <Footer />
             </View>
-
-            <Toast />
         </ScrollView>
     );
 };
 
+// Estilos da tela
 const styles = StyleSheet.create({
     container: {
         gap: 25,
@@ -124,4 +177,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default HomeScreens; // exporta o componente como padrão do módulo
+export default HomeScreens;

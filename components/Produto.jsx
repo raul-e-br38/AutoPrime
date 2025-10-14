@@ -3,20 +3,17 @@ import { TouchableOpacity, Text, StyleSheet, Image, View } from 'react-native';
 import colors from "../design/colors";
 import { useNavigation } from '@react-navigation/native';
 
-export default function Produto({ nome, preco, imagem, descricao }) {
+export default function Produto({ nome, preco, imagem, marca, descricao }) {
     const navigation = useNavigation();
     const [imageError, setImageError] = useState(false);
 
-    const produto = {
-        nome,
-        preco,
-        imagemUrl: imagem,
-        descricao,
-    };
+    const produto = { nome, preco, imagemUrl: imagem, descricao, marca };
+
 
     const comprar = () => {
+        console.log("Produto enviado para a tela:", produto);
         navigation.navigate('Produto', {
-            produto: { nome, preco, descricao, imagem }
+            produto: { nome, preco, descricao, imagem, marca }
         });
     };
 

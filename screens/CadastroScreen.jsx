@@ -1,47 +1,53 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity, ScrollView, TextInput } from 'react-native';
-import BtnEnviar from '../components/BtnEnviar';
-import colors from "../design/colors";
-import { cadastro } from "../services/autenticacaoService";
-import RNPickerSelect from "react-native-picker-select";
-import Toast from 'react-native-toast-message';
+import React, { useState } from 'react';  // Importando React e useState para gerenciar o estado
+import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity, ScrollView, TextInput } from 'react-native';  // Componentes do React Native
+import BtnEnviar from '../components/BtnEnviar';  // Componente personalizado de botão de envio
+import colors from "../design/colors";  // Arquivo de cores para o design da app
+import { cadastro } from "../services/autenticacaoService";  // Função de cadastro do serviço de autenticação
+import RNPickerSelect from "react-native-picker-select";  // Componente de seleção (dropdown) para escolher cargo
+import Toast from 'react-native-toast-message';  // Componente para mostrar mensagens de sucesso ou erro
 
+// Função de validação da senha
 function validarSenha(senha) {
     const requisitos = {
-        minLength: senha.length >= 8,
-        hasUpperCase: /[A-Z]/.test(senha),
-        hasNumber: /[0-9]/.test(senha),
-        hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(senha),
+        minLength: senha.length >= 8,  // A senha deve ter pelo menos 8 caracteres
+        hasUpperCase: /[A-Z]/.test(senha),  // Deve conter uma letra maiúscula
+        hasNumber: /[0-9]/.test(senha),  // Deve conter um número
+        hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(senha),  // Deve conter um caractere especial
     };
 
     return {
-        valida: requisitos.minLength && requisitos.hasUpperCase && requisitos.hasNumber && requisitos.hasSpecial,
-        requisitos: requisitos
+        valida: requisitos.minLength && requisitos.hasUpperCase && requisitos.hasNumber && requisitos.hasSpecial,  // Retorna se a senha é válida ou não
+        requisitos: requisitos  // Retorna todos os requisitos para uso posterior, caso necessário
     };
 }
 
+// Componente principal da tela de Cadastro
 export default function CadastroScreen({ navigation }) {
-    const [nome, setNome] = useState("");
-    const [email, setEmail] = useState("");
-    const [cargo, setCargo] = useState("");
-    const [senha, setSenha] = useState("");
-    const [erroSenha, setErroSenha] = useState("");
+    // Estado dos campos de entrada do formulário
+    const [nome, setNome] = useState("");  // Nome do usuário
+    const [email, setEmail] = useState("");  // Email do usuário
+    const [cargo, setCargo] = useState("");  // Cargo do usuário
+    const [senha, setSenha] = useState("");  // Senha do usuário
+    const [erroSenha, setErroSenha] = useState("");  // Erro de validação da senha
 
+    // Função para lidar com a mudança de senha
     const handleSenhaChange = (text) => {
-        setSenha(text);
+        setSenha(text);  // Atualiza o estado da senha
         if (text.length > 0) {
-            const validacao = validarSenha(text);
+            const validacao = validarSenha(text);  // Valida a senha à medida que o usuário digita
             if (!validacao.valida) {
                 setErroSenha("Senha deve ter: 8 caracteres, maiúscula, número e caractere especial");
             } else {
-                setErroSenha("");
+                setErroSenha("");  // Se a senha for válida, limpa a mensagem de erro
             }
         } else {
-            setErroSenha("");
+            setErroSenha("");  // Se a senha estiver vazia, limpa a mensagem de erro
         }
     };
 
+    // Função para lidar com o envio do formulário de cadastro
     const handleCadastro = async () => {
+        // Validações dos campos antes de enviar o formulário
         if (!nome || nome.trim().length === 0) {
             Toast.show({ type: 'error', text1: 'Erro', text2: 'Por favor, preencha o nome.' });
             return;
@@ -62,6 +68,7 @@ export default function CadastroScreen({ navigation }) {
             return;
         }
 
+        // Validação da senha
         const validacao = validarSenha(senha);
         if (!validacao.valida) {
             Toast.show({ type: 'error', text1: 'Erro na Senha', text2: 'A senha deve ter 8 caracteres, maiúscula, número e caractere especial.' });
@@ -69,15 +76,17 @@ export default function CadastroScreen({ navigation }) {
         }
 
         try {
+            // Envia os dados para o serviço de cadastro
             const res = await cadastro(nome, email, cargo, senha);
             Toast.show({ type: 'success', text1: 'Sucesso!', text2: res.mensagem });
-            navigation.navigate("Login");
+            navigation.navigate("Login");  // Navega para a tela de login após sucesso
         } catch (error) {
             Toast.show({ type: 'error', text1: 'Erro', text2: error.message });
         }
     };
 
     return (
+        // Tela de fundo com imagem
         <ImageBackground
             source={require("../assets/fundoLogin.jpg")}
             style={styles.fundo}
@@ -87,6 +96,7 @@ export default function CadastroScreen({ navigation }) {
                 <View style={styles.container}>
                     <Text style={styles.text}>Cadastre-se</Text>
 
+                    {/* Campo de nome */}
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
@@ -94,10 +104,11 @@ export default function CadastroScreen({ navigation }) {
                             placeholderTextColor={colors.cinza_medio}
                             value={nome}
                             onChangeText={setNome}
-                            autoCapitalize="words"
+                            autoCapitalize="words"  // Capitaliza automaticamente a primeira letra de cada palavra
                         />
                     </View>
 
+                    {/* Campo de email */}
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
@@ -105,42 +116,47 @@ export default function CadastroScreen({ navigation }) {
                             placeholderTextColor={colors.cinza_medio}
                             value={email}
                             onChangeText={setEmail}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
+                            keyboardType="email-address"  // Formato de teclado adequado para e-mail
+                            autoCapitalize="none"  // Não capitaliza o e-mail
                         />
                     </View>
 
+                    {/* Dropdown para selecionar o cargo */}
                     <View style={styles.pickerContainer}>
                         <RNPickerSelect
-                            onValueChange={(value) => setCargo(value)}
+                            onValueChange={(value) => setCargo(value)}  // Atualiza o estado do cargo
                             items={[
                                 { label: "Vendedor", value: "Vendedor" },
                                 { label: "Cliente", value: "Cliente" },
                             ]}
-                            placeholder={{ label: "Selecione seu cargo...", value: null }}
+                            placeholder={{ label: "Selecione seu cargo...", value: null }}  // Texto de placeholder
                             style={pickerSelectStyles}
-                            value={cargo}
-                            useNativeAndroidPickerStyle={false}
+                            value={cargo}  // Valor selecionado
+                            useNativeAndroidPickerStyle={false}  // Estilo nativo do Android desativado
                         />
                     </View>
 
+                    {/* Campo de senha */}
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
                             placeholder="Senha"
                             placeholderTextColor={colors.cinza_medio}
                             value={senha}
-                            onChangeText={handleSenhaChange}
-                            secureTextEntry
+                            onChangeText={handleSenhaChange}  // Chama a função de validação da senha
+                            secureTextEntry  // Torna o campo de senha oculto
                         />
                     </View>
 
+                    {/* Exibe a mensagem de erro se a senha for inválida */}
                     {erroSenha ? <Text style={styles.erroTexto}>{erroSenha}</Text> : null}
 
+                    {/* Termos de Política e Privacidade */}
                     <Text style={styles.termos}>
                         Ao continuar você concorda com nossos <Text style={styles.bold}>Termos de Política e Privacidade</Text>
                     </Text>
 
+                    {/* Link para a tela de login caso já tenha conta */}
                     <View style={styles.cadastroContainer}>
                         <Text style={styles.txt}>Já tem uma conta? </Text>
                         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -148,14 +164,17 @@ export default function CadastroScreen({ navigation }) {
                         </TouchableOpacity>
                     </View>
 
+                    {/* Botão de envio para cadastro */}
                     <BtnEnviar onPress={handleCadastro} title="Cadastrar-se" />
                 </View>
 
+                {/* Logo da aplicação */}
                 <Image source={require("../assets/logo.png")} style={styles.logo} />
             </ScrollView>
         </ImageBackground>
     );
 }
+
 
 const styles = StyleSheet.create({
     fundo: {

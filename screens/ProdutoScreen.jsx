@@ -4,13 +4,12 @@ import { useRoute } from '@react-navigation/native';
 import colors from "../design/colors";
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import BtnEnviar from "../components/BtnEnviar";
 import BtnGrande from "../components/BtnGrande";
 
+// Definindo o componente ProdutoScreen
 export default function ProdutoScreen() {
     const route = useRoute();
-    const produto = route.params?.produto;
-
+    const produto = route.params?.produto;  // Pegando o parâmetro 'produto' da rota
     if (!produto) {
         return (
             <View>
@@ -23,6 +22,7 @@ export default function ProdutoScreen() {
         );
     }
 
+    // Estado para controlar a quantidade de produto
     const [counter, setCounter] = useState(1);
 
     const increment = () => setCounter(counter + 1);
@@ -34,9 +34,11 @@ export default function ProdutoScreen() {
 
 
     return (
+
         <ScrollView>
             <Header />
             <View>
+                {/* Imagem do produto */}
                 <Image
                     style={styles.imagem}
                     source={{
@@ -49,15 +51,24 @@ export default function ProdutoScreen() {
                 />
             </View>
 
+            {/* Nome do produto */}
             <Text style={styles.nome}>{produto.nome}</Text>
+
+            {/* Exibindo a Marca */}
+            <Text style={styles.marca1}>Marca: <Text style={styles.marca2}>{produto.marca}</Text> </Text> {/* Exibe a marca do produto */}
+
+            {/* Preço do produto */}
             <Text style={styles.preco}>R${parseFloat(produto.preco).toFixed(2)}</Text>
 
+
+
+            {/* Variações do produto */}
             <View style={styles.variacoes}>
                 <TouchableOpacity style={styles.variacao}><Text style={styles.textoBtn}>Black Piano</Text></TouchableOpacity>
                 <TouchableOpacity style={styles.variacao}><Text style={styles.textoBtn}>Aço Polido</Text></TouchableOpacity>
             </View>
 
-
+            {/* Contador para aumentar ou diminuir a quantidade do produto */}
             <View style={styles.counterContainer}>
                 <TouchableOpacity onPress={decrement} style={styles.counterButton}>
                     <Text style={styles.counterText}>-</Text>
@@ -72,12 +83,21 @@ export default function ProdutoScreen() {
                 </TouchableOpacity>
             </View>
 
+            {/* Botão de adicionar ao carrinho */}
             <View style={styles.carrinho}>
-                <BtnGrande title={'Adicionar ao Carrinho'}/>
+                <BtnGrande title={'Adicionar ao Carrinho'} />
             </View>
+            <View style={{
+                marginVertical: 25,
+                height: 1,          // altura da linha
+                backgroundColor: 'black', // cor da linha
+                width: '100%'       // ocupa toda a largura da tela
+            }} />
 
+            {/* Descrição do produto */}
             <Text style={styles.titulo}>Descrição:</Text>
             <Text style={styles.descricao}>{produto.descricao}</Text>
+
             <Footer />
         </ScrollView>
     );
@@ -93,20 +113,21 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
     },
     nome: {
-        fontSize: 20,
+        fontSize: 25,
         fontWeight: 'light',
         color: colors.azul_fonte,
         margin: 10,
         fontStyle: 'italic',
     },
+
     preco: {
-        fontSize: 24,
+        fontSize: 30,
         fontWeight: "600",
         color: colors.azul_fonte,
         margin: 10,
     },
     descricao: {
-        marginTop: 16,
+        margin: 10,
         marginBottom: 230,
     },
     carrinho: {
@@ -149,7 +170,6 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         borderColor: colors.azul_vibrante,
         borderWidth: 2,
-
     },
     counterText: {
         fontSize: 24,
@@ -169,7 +189,22 @@ const styles = StyleSheet.create({
         color: colors.azul_vibrante,
     },
     titulo:{
+        margin: 10,
         fontSize: 20,
         fontWeight: 'bold',
+    },
+    marca1:{
+        fontSize: 20,
+        fontWeight: 'light',
+        color: colors.azul_fonte,
+        marginHorizontal:10,
+        fontStyle: 'italic',
+    },
+    marca2:{
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: colors.azul_fonte,
+        marginHorizontal:10,
+        fontStyle: 'italic',
     },
 });
