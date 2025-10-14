@@ -1,4 +1,4 @@
-const API_URL = "http://192.168.1.132:5000";
+const API_URL = "http://192.168.1.127:5000";
 // Definindo a URL base da API que será usada nas requisições.
 // Aqui, a URL está apontando para um servidor local na rede.
 

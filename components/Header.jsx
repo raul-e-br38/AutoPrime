@@ -46,7 +46,7 @@ export default function Header({ onSearch }) {
 
 const styles = StyleSheet.create({
     preto: {
-        padding: 5,
+        padding: 10,
         backgroundColor: colors.preto,
     },
     container: {

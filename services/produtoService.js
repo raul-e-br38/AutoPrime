@@ -1,4 +1,4 @@
-const API_URL = "http://192.168.1.132:5000";
+const API_URL = "http://192.168.1.127:5000";
 // Define a URL base da API, que neste caso é um servidor local na rede com o endereço IP 192.168.1.115 e a porta 5000.
 
 async function listarProdutos() {

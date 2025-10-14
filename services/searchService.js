@@ -1,4 +1,4 @@
-    const API_URL = "http://192.168.1.132:5000";
+    const API_URL = "http://192.168.1.127:5000";
 // Define a URL base para a API
 
 export async function buscarProdutos(nome) {
