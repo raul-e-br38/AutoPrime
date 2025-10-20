@@ -10,6 +10,7 @@ import BtnGrande from "../components/BtnGrande";
 export default function ProdutoScreen() {
     const route = useRoute();
     const produto = route.params?.produto;  // Pegando o parâmetro 'produto' da rota
+
     if (!produto) {
         return (
             <View>
@@ -24,43 +25,56 @@ export default function ProdutoScreen() {
 
     // Estado para controlar a quantidade de produto
     const [counter, setCounter] = useState(1);
+    const [imageError, setImageError] = useState(false); // Estado para controlar erro da imagem
 
     const increment = () => setCounter(counter + 1);
     const decrement = () => {
-        if (counter > 0) {
+        if (counter > 1) {
             setCounter(counter - 1);
         }
     };
 
+    const handleImageError = () => {
+        setImageError(true); // Quando a imagem der erro, exibe o placeholder
+    };
+
+    const handleImageLoad = () => {
+        setImageError(false); // Quando a imagem carregar corretamente, oculta o placeholder
+    };
 
     return (
-
         <ScrollView>
             <Header />
             <View>
                 {/* Imagem do produto */}
-                <Image
-                    style={styles.imagem}
-                    source={{
-                        uri: produto.imagem
-                            ? `http://192.168.1.127:5000/static/imagens/${produto.imagem}`
-                            : 'https://via.placeholder.com/200x200.png?text=Sem+Imagem',
-                    }}
-                    onError={(e) => console.log("Erro ao carregar imagem:", e.nativeEvent.error)}
-                    onLoad={() => console.log("Imagem carregada com sucesso")}
-                />
+                <View style={styles.imageContainer}>
+                    {!imageError && produto.imagem ? (
+                        <Image
+                            style={styles.imagem}
+                            source={{
+                                uri: produto.imagem
+                                    ? `http://192.168.1.122:5000/static/imagens/${produto.imagem}`
+                                    : 'https://via.placeholder.com/200x200.png?text=Sem+Imagem',
+                            }}
+                            onError={handleImageError}  // Tratamento de erro da imagem
+                            onLoad={handleImageLoad}     // Quando a imagem carregar com sucesso
+                        />
+                    ) : (
+                        <View style={styles.placeholderContainer}>
+                            <Text style={styles.placeholderText}>Sem Imagem</Text>
+                        </View>
+                    )}
+                </View>
             </View>
 
             {/* Nome do produto */}
             <Text style={styles.nome}>{produto.nome}</Text>
 
             {/* Exibindo a Marca */}
-            <Text style={styles.marca1}>Marca: <Text style={styles.marca2}>{produto.marca}</Text> </Text> {/* Exibe a marca do produto */}
+            <Text style={styles.marca1}>Marca: <Text style={styles.marca2}>{produto.marca}</Text> </Text>
 
             {/* Preço do produto */}
             <Text style={styles.preco}>R${parseFloat(produto.preco).toFixed(2)}</Text>
-
-
 
             {/* Variações do produto */}
             <View style={styles.variacoes}>
@@ -87,12 +101,6 @@ export default function ProdutoScreen() {
             <View style={styles.carrinho}>
                 <BtnGrande title={'Adicionar ao Carrinho'} />
             </View>
-            <View style={{
-                marginVertical: 25,
-                height: 1,          // altura da linha
-                backgroundColor: 'black', // cor da linha
-                width: '100%'       // ocupa toda a largura da tela
-            }} />
 
             {/* Descrição do produto */}
             <Text style={styles.titulo}>Descrição:</Text>
@@ -111,6 +119,24 @@ const styles = StyleSheet.create({
         resizeMode: 'contain',
         margin: 10,
         borderWidth: 0.5,
+    },
+    imageContainer: {
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    placeholderContainer: {
+        marginTop:10,
+        width: 200,
+        height: 200,
+        backgroundColor: colors.cinza,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 5,
+    },
+    placeholderText: {
+        color: colors.azul_fonte,
+        fontSize: 16,
+        textAlign: 'center',
     },
     nome: {
         fontSize: 25,
