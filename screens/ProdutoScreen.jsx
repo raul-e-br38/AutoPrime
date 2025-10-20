@@ -43,7 +43,7 @@ export default function ProdutoScreen() {
                     style={styles.imagem}
                     source={{
                         uri: produto.imagem
-                            ? `http://192.168.1.127:5000/static/imagens/${produto.imagem}`
+                            ? `http://192.168.1.122:5000/static/imagens/${produto.imagem}`
                             : 'https://via.placeholder.com/200x200.png?text=Sem+Imagem',
                     }}
                     onError={(e) => console.log("Erro ao carregar imagem:", e.nativeEvent.error)}
