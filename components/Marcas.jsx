@@ -1,19 +1,16 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, TextInput, View, Image } from 'react-native';
+import { TouchableOpacity, Image, StyleSheet } from 'react-native';
 import colors from "../design/colors";
 
-export default function Marcas() {
+export default function Marcas({ nome, imagem, onPress }) {
     return (
-        <TouchableOpacity style={styles.circle}>
-            <Image source={require('../assets/fiat.png')} style={styles.logo} resizeMode="contain" />
+        <TouchableOpacity style={styles.circle} onPress={() => onPress(nome)}>
+            <Image source={imagem} style={styles.logo} resizeMode="contain" />
         </TouchableOpacity>
-
-
-    )
+    );
 }
 
 const styles = StyleSheet.create({
-
     circle: {
         width: 100,
         height: 100,
@@ -27,4 +24,4 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
     },
-})
+});

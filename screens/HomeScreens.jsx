@@ -23,6 +23,18 @@ const HomeScreens = () => {
     const isFocused = useIsFocused();
     // Hook para acessar parâmetros da navegação
     const route = useRoute();
+    const handleFiltrarPorMarca = (marcaSelecionada) => {
+        if (!marcaSelecionada) {
+            setProdutos(produtosOriginais);
+            return;
+        }
+
+        const filtrados = produtosOriginais.filter(
+            p => p.marca && p.marca.toLowerCase() === marcaSelecionada.toLowerCase()
+        );
+        setProdutos(filtrados);
+    };
+
 
     // useEffect que dispara ao montar a tela ou quando ela volta ao foco
     useEffect(() => {
@@ -106,11 +118,39 @@ const HomeScreens = () => {
             <Header onSearch={handleBuscarProdutos} />
 
             {/* Seção de marcas */}
-            <View style={styles.container}>
-                <Marcas />
-                <Marcas />
-                <Marcas />
-            </View>
+            <ScrollView
+                horizontal
+                contentContainerStyle={styles.marcasContainer}
+                style={styles.container}
+            >
+                <Marcas nome="Fiat" imagem={require('../assets/fiat.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Volkswagen" imagem={require('../assets/volkswagen.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Chevrolet" imagem={require('../assets/chevrolet.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Ford" imagem={require('../assets/ford.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Renault" imagem={require('../assets/renault.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Peugeot" imagem={require('../assets/peugeot.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Citroen" imagem={require('../assets/citroen.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Toyota" imagem={require('../assets/toyota.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Honda" imagem={require('../assets/honda.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Nissan" imagem={require('../assets/nissan.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Hyundai" imagem={require('../assets/hyundai.png')} onPress={handleFiltrarPorMarca} />
+
+                <Marcas nome="BMW" imagem={require('../assets/bmw.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Mercedes" imagem={require('../assets/mercedes.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Audi" imagem={require('../assets/audi.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Volvo" imagem={require('../assets/volvo.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Land Rover" imagem={require('../assets/landrover.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Porsche" imagem={require('../assets/porsche.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Lexus" imagem={require('../assets/lexus.png')} onPress={handleFiltrarPorMarca} />
+
+                <Marcas nome="Mitsubishi" imagem={require('../assets/mitsubishi.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Subaru" imagem={require('../assets/subaru.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Kia" imagem={require('../assets/kia.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Jeep" imagem={require('../assets/jeep.png')} onPress={handleFiltrarPorMarca} />
+                <Marcas nome="Dodge" imagem={require('../assets/dodge.png')} onPress={handleFiltrarPorMarca} />
+
+
+            </ScrollView>
 
             {/* Título da seção */}
             <Text style={styles.titulo}>Explore Nosso Catálogo</Text>
@@ -148,11 +188,12 @@ const HomeScreens = () => {
 // Estilos da tela
 const styles = StyleSheet.create({
     container: {
-        gap: 25,
-        justifyContent: 'center',
+        paddingVertical: 20,
+    },
+    marcasContainer: {
+        paddingHorizontal: 20,
+        gap: 20,
         alignItems: 'center',
-        padding: 20,
-        flexDirection: 'row',
     },
     titulo: {
         fontSize: 16,
