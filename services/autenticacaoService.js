@@ -1,4 +1,4 @@
-const API_URL = "http://192.168.1.122:5000";
+import API_URL from './apiConfig'; // Importa o API_URL
 // Definindo a URL base da API que será usada nas requisições.
 // Aqui, a URL está apontando para um servidor local na rede.
 

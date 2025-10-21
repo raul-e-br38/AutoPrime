@@ -1,5 +1,6 @@
+
 // Define a URL base da API. Neste caso, é um servidor local com IP 192.168.1.122 e porta 5000
-const API_URL = "http://192.168.1.122:5000";
+import API_URL from './apiConfig'; // Importa o API_URL
 
 // Função assíncrona para listar produtos da API
 async function listarProdutos() {

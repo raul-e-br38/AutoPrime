@@ -5,6 +5,7 @@ import colors from "../design/colors";
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BtnGrande from "../components/BtnGrande";
+import API_URL from "../services/apiConfig";
 
 // Definindo o componente ProdutoScreen
 export default function ProdutoScreen() {
@@ -53,7 +54,7 @@ export default function ProdutoScreen() {
                             style={styles.imagem}
                             source={{
                                 uri: produto.imagem
-                                    ? `http://192.168.1.122:5000/static/imagens/${produto.imagem}`
+                                    ? `${API_URL}/static/imagens/${imagem}`
                                     : 'https://via.placeholder.com/200x200.png?text=Sem+Imagem',
                             }}
                             onError={handleImageError}  // Tratamento de erro da imagem

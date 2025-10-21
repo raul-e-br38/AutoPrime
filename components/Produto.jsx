@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, Image, View } from 'react-native';
 import colors from "../design/colors";
 import { useNavigation } from '@react-navigation/native';
+import API_URL from '../services/apiConfig';
 
 export default function Produto({ nome, preco, imagem, marca, descricao }) {
     const navigation = useNavigation();
@@ -27,7 +28,7 @@ export default function Produto({ nome, preco, imagem, marca, descricao }) {
         setImageError(false);
     };
 
-    console.log("URL da imagem:", imagem ? `http://192.168.1.122:5000/static/imagens/${imagem}` : "placeholder")
+    console.log("URL da imagem:", imagem ? `${API_URL}/static/imagens/${imagem}` : "placeholder");
 
 
     return (
@@ -37,7 +38,7 @@ export default function Produto({ nome, preco, imagem, marca, descricao }) {
                     <Image
                         style={styles.foto}
                         source={{
-                            uri: `http://192.168.1.122:5000/static/imagens/${imagem}`
+                            uri: `${API_URL}/static/imagens/${imagem}`
                         }}
                         onError={handleImageError}
                         onLoad={handleImageLoad}
