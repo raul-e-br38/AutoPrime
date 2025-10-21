@@ -54,7 +54,7 @@ export default function ProdutoScreen() {
                             style={styles.imagem}
                             source={{
                                 uri: produto.imagem
-                                    ? `${API_URL}/static/imagens/${imagem}`
+                                    ? `${API_URL}/static/imagens/${produto.imagem}`
                                     : 'https://via.placeholder.com/200x200.png?text=Sem+Imagem',
                             }}
                             onError={handleImageError}  // Tratamento de erro da imagem
