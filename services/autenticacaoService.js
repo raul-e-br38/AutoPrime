@@ -26,6 +26,7 @@ export async function login(email, senha) {
             // Se a resposta não for bem-sucedida
             // lança um erro com a mensagem contida no campo 'error' da resposta.
             throw new Error(data.error || "Erro ao fazer login");
+
         }
 
         return data;
@@ -35,9 +36,9 @@ export async function login(email, senha) {
         // Caso ocorra algum erro (seja na requisição ou no processo de conversão da resposta),
         // ele será lançado para ser tratado fora da função.
         throw error;
+
     }
 }
-
 
 // CADASTRO
 export async function cadastro(nome, email, cargo, senha) {

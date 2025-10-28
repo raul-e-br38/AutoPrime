@@ -44,8 +44,14 @@ export default function LoginScreen({ navigation }) {
             // Salva o token do usuário no armazenamento local do app (persistência).
             await AsyncStorage.setItem("token", userData.token);
             await AsyncStorage.setItem("nome", userData.nome);
+            if (userData.id_cadastro) {
+                await AsyncStorage.setItem("usuario_id", String(userData.id_cadastro));
+            } else {
+                console.warn("ID do usuário não recebido do servidor");
+            }
 
-            console.log("TOKEN E NOME SALVOS:", userData.token, userData.nome);// Mostra no console os dados salvos
+
+            console.log("TOKEN, NOME e ID SALVOS:", userData.token, userData.nome, userData.id_cadastro);// Mostra no console os dados salvos
 
 
 
@@ -62,7 +68,7 @@ export default function LoginScreen({ navigation }) {
             });
         } catch (error) {
             let mensagemErro = 'Erro ao fazer login, tente novamente.';
-
+            console.error(error);
             if (error.message && error.message.includes('Network request failed')) {
                 mensagemErro = 'Erro de conexão.Tente novamente.';
             }

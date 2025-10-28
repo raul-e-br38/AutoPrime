@@ -55,14 +55,14 @@ export default function ProdutoScreen() {
                             source={{
                                 uri: produto.imagem
                                     ? `${API_URL}/static/imagens/${produto.imagem}`
-                                    : 'https://via.placeholder.com/200x200.png?text=Sem+Imagem',
+                                    : 'https://via.placeholder.com/200x200.png?text=Erro+ao+Carregar+Imagem',
                             }}
                             onError={handleImageError}  // Tratamento de erro da imagem
                             onLoad={handleImageLoad}     // Quando a imagem carregar com sucesso
                         />
                     ) : (
                         <View style={styles.placeholderContainer}>
-                            <Text style={styles.placeholderText}>Sem Imagem</Text>
+                            <Text style={styles.placeholderText}>Erro ao Carregar Imagem</Text>
                         </View>
                     )}
                 </View>

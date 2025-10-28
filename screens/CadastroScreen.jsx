@@ -77,11 +77,14 @@ export default function CadastroScreen({ navigation }) {
 
         try {
             // Envia os dados para o serviço de cadastro
+
             const res = await cadastro(nome, email, cargo, senha);
             Toast.show({ type: 'success', text1: 'Sucesso!', text2: res.mensagem });
             navigation.navigate("Login");  // Navega para a tela de login após sucesso
         } catch (error) {
-            Toast.show({ type: 'error', text1: 'Erro', text2: error.message });
+            console.log('Senha:',senha,"Nome:", nome,"Email:", email,"Cargo:", cargo);
+            console.log(error);
+            Toast.show({ type: 'error', text1: 'Erro', text2: 'Erro de Conexão, Tente Novamente' });
         }
     };
 
