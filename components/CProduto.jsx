@@ -1,22 +1,34 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, Image, View } from 'react-native';
 import colors from "../design/colors";
-import { useNavigation } from '@react-navigation/native';
 import API_URL from '../services/apiConfig';
 
-export default function CProduto() {
+export default function CProduto({ nome, marca, quantidade, valor_unitario, valor_total, imagem }) {
+    const [imageError, setImageError] = useState(false);
+
+    const handleImageError = () => {
+        setImageError(true);
+    };
 
     return (
         <TouchableOpacity style={styles.produto}>
             <View style={styles.imageContainer}>
-            <Image style={styles.foto} source={require('../assets/audi.png')} />
+                {!imageError && imagem ? (
+                    <Image
+                        style={styles.foto}
+                        source={{ uri: `${API_URL}/static/imagens/${imagem}` }}
+                        onError={handleImageError}
+                    />
+                ) : (
+                    <Image style={styles.foto} source={require('../assets/audi.png')} />
+                )}
             </View>
 
-            <Text style={styles.nome}>Tadalafila</Text>
-            <Text style={styles.preco}>Preço Uni: R$ 90</Text>
-            <Text style={styles.preco}>Preço Total: R$ 900</Text>
-            <Text style={styles.quantidade}>10</Text>
-
+            <Text style={styles.nome}>{nome}</Text>
+            <Text style={styles.marca}>Marca: {marca}</Text>
+            <Text style={styles.preco}>Preço Uni: R$ {valor_unitario.toFixed(2)}</Text>
+            <Text style={styles.preco}>Preço Total: R$ {valor_total.toFixed(2)}</Text>
+            <Text style={styles.quantidade}>Qtd: {quantidade}</Text>
         </TouchableOpacity>
     );
 }
@@ -31,9 +43,8 @@ const styles = StyleSheet.create({
     },
     imageContainer: { alignItems: 'center', marginBottom: 15 },
     foto: { width: 100, height: 100, resizeMode: 'contain' },
-    placeholderContainer: { width: 100, height: 100, backgroundColor: colors.cinza, justifyContent: 'center', alignItems: 'center', borderRadius: 5 },
-    placeholderText: { color: colors.azul_fonte, fontSize: 12, textAlign: 'center' },
     nome: { color: colors.azul_fonte, fontWeight: "500", marginBottom: 5 },
+    marca: { color: colors.azul_fonte, marginBottom: 5 },
     preco: { color: colors.azul_fonte, fontWeight: "bold" },
     quantidade: { color: colors.azul_fonte, fontWeight: "500" },
 });

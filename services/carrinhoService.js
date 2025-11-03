@@ -1,4 +1,3 @@
-// src/services/carrinhoService.js
 import API_URL from './apiConfig';
 
 const carrinhoService = {
@@ -18,13 +17,15 @@ const carrinhoService = {
 
     async listarCarrinho(email_cliente) {
         try {
-            const response = await fetch("http://192.168.1.125:5000/carrinho/teco@gmail.com");
+            const response = await fetch(`${API_URL}/carrinho/${email_cliente}`);
             const dados = await response.json();
-            console.log("Teste fetch:", dados);
+            return dados; // Retorna o JSON para o componente usar
         } catch (err) {
             console.error("Erro fetch teste:", err);
+            throw err;
         }
     },
+
 
     async removerItem(id_item) {
         try {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, FlatList, ActivityIndicator, StyleSheet, RefreshControl, ScrollView } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 import carrinhoService from "../services/carrinhoService";
@@ -12,6 +13,7 @@ export default function CarrinhoScreen() {
     const [itens, setItens] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const isFocused = useIsFocused();
 
     const carregarCarrinho = async () => {
         try {
@@ -44,8 +46,10 @@ export default function CarrinhoScreen() {
     };
 
     useEffect(() => {
-        carregarCarrinho();
-    }, []);
+        if (isFocused) {
+            carregarCarrinho();
+        }
+    }, [isFocused]);
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -69,11 +73,21 @@ export default function CarrinhoScreen() {
 
             {itens.length === 0 ? (
                 <View style={styles.center}>
-                    <CProduto/>
                     <Text style={{ fontSize: 18 }}>Carrinho vazio</Text>
                 </View>
             ) : (
-                <CProduto/>
+                <View style={styles.listaProdutos}>
+                    {itens.map(item => (
+                        <CProduto
+                            key={item.id_item}
+                            nome={item.nome_produto}
+                            marca={item.marca}
+                            quantidade={item.quantidade}
+                            valor_unitario={item.valor_unitario}
+                            valor_total={item.valor_total}
+                        />
+                    ))}
+                </View>
             )}
 
             <Footer />
@@ -83,4 +97,5 @@ export default function CarrinhoScreen() {
 
 const styles = StyleSheet.create({
     center: { flex: 1, justifyContent: "center", alignItems: "center", marginTop: 50 },
+    listaProdutos: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", padding: 10 },
 });
