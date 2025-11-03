@@ -13,7 +13,8 @@ export default function CProduto() {
             </View>
 
             <Text style={styles.nome}>Tadalafila</Text>
-            <Text style={styles.preco}>Preço Total: R$ 999</Text>
+            <Text style={styles.preco}>Preço Uni: R$ 90</Text>
+            <Text style={styles.preco}>Preço Total: R$ 900</Text>
             <Text style={styles.quantidade}>10</Text>
 
         </TouchableOpacity>
