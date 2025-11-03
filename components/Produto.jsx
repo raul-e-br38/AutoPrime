@@ -4,17 +4,14 @@ import colors from "../design/colors";
 import { useNavigation } from '@react-navigation/native';
 import API_URL from '../services/apiConfig';
 
-export default function Produto({ nome, preco, imagem, marca, descricao }) {
+export default function Produto({ id, nome, preco, imagem, marca, descricao }) {
     const navigation = useNavigation();
     const [imageError, setImageError] = useState(false);
 
-    const produto = { nome, preco, imagemUrl: imagem, descricao, marca };
-
-
     const comprar = () => {
-        console.log("Produto enviado para a tela:", produto);
+        console.log("Produto enviado para a tela:", { id, nome, preco, descricao, imagem, marca });
         navigation.navigate('Produto', {
-            produto: { nome, preco, descricao, imagem, marca }
+            produto: { id, nome, preco, descricao, imagem, marca }
         });
     };
 
@@ -28,18 +25,13 @@ export default function Produto({ nome, preco, imagem, marca, descricao }) {
         setImageError(false);
     };
 
-    console.log("URL da imagem:", imagem ? `${API_URL}/static/imagens/${imagem}` : "placeholder");
-
-
     return (
         <TouchableOpacity style={styles.produto} onPress={comprar}>
             <View style={styles.imageContainer}>
                 {!imageError && imagem ? (
                     <Image
                         style={styles.foto}
-                        source={{
-                            uri: `${API_URL}/static/imagens/${imagem}`
-                        }}
+                        source={{ uri: `${API_URL}/static/imagens/${imagem}` }}
                         onError={handleImageError}
                         onLoad={handleImageLoad}
                     />
@@ -64,35 +56,10 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         marginBottom: 10,
     },
-    imageContainer: {
-        alignItems: 'center',
-        marginBottom: 15,
-    },
-    foto: {
-        width: 100,
-        height: 100,
-        resizeMode: 'contain',
-    },
-    placeholderContainer: {
-        width: 100,
-        height: 100,
-        backgroundColor: colors.cinza,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 5,
-    },
-    placeholderText: {
-        color: colors.azul_fonte,
-        fontSize: 12,
-        textAlign: 'center',
-    },
-    nome: {
-        color: colors.azul_fonte,
-        fontWeight: "500",
-        marginBottom: 5,
-    },
-    preco: {
-        color: colors.azul_fonte,
-        fontWeight: "bold",
-    },
+    imageContainer: { alignItems: 'center', marginBottom: 15 },
+    foto: { width: 100, height: 100, resizeMode: 'contain' },
+    placeholderContainer: { width: 100, height: 100, backgroundColor: colors.cinza, justifyContent: 'center', alignItems: 'center', borderRadius: 5 },
+    placeholderText: { color: colors.azul_fonte, fontSize: 12, textAlign: 'center' },
+    nome: { color: colors.azul_fonte, fontWeight: "500", marginBottom: 5 },
+    preco: { color: colors.azul_fonte, fontWeight: "bold" },
 });

@@ -5,7 +5,7 @@ import BtnEnviar from '../components/BtnEnviar';
 import colors from "../design/colors";
 import { login } from "../services/autenticacaoService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Toast from 'react-native-toast-message'; // <--- novo
+import Toast from 'react-native-toast-message';
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState("");
@@ -14,46 +14,40 @@ export default function LoginScreen({ navigation }) {
     const handleLogin = async () => {
 
         console.log("EMAIL:", email, "SENHA:", senha); // Debug!
-        // Bloco "try" para capturar possíveis erros durante o login.
-
 
         try {
-
             if (!email || !senha) {
                 Toast.show({
                     type: 'error',
                     text1: 'Erro',
-                    text2: 'Preencha email e senha ',
+                    text2: 'Preencha email e senha',
                 });
                 return;
             }
 
-            // Chama a função assíncrona "login" enviando email e senha.
-            // Espera a resposta do servidor e armazena em "userData".
             const userData = await login(email, senha);
 
             if (userData.error) {
                 Toast.show({ type: 'error', text1: 'Erro', text2: userData.error });
                 return;
             }
-            // Verifica se o servidor não enviou um token de autenticação.
+
             if (!userData.token) {
                 Toast.show({ type: 'error', text1: 'Erro', text2: 'Token não recebido do servidor' });
                 return;
             }
-            // Salva o token do usuário no armazenamento local do app (persistência).
+
+            // Salva dados no AsyncStorage
             await AsyncStorage.setItem("token", userData.token);
             await AsyncStorage.setItem("nome", userData.nome);
+            await AsyncStorage.setItem("email", email); // <<< Correção: salva email
             if (userData.id_cadastro) {
                 await AsyncStorage.setItem("usuario_id", String(userData.id_cadastro));
             } else {
                 console.warn("ID do usuário não recebido do servidor");
             }
 
-
-            console.log("TOKEN, NOME e ID SALVOS:", userData.token, userData.nome, userData.id_cadastro);// Mostra no console os dados salvos
-
-
+            console.log("TOKEN, NOME, EMAIL e ID SALVOS:", userData.token, userData.nome, email, userData.id_cadastro);
 
             Toast.show({
                 type: 'success',
@@ -61,16 +55,16 @@ export default function LoginScreen({ navigation }) {
                 text2: 'Login realizado com sucesso.',
             });
 
-
             navigation.reset({
                 index: 0,
                 routes: [{ name: "Home" }],
             });
+
         } catch (error) {
             let mensagemErro = 'Erro ao fazer login, tente novamente.';
             console.error(error);
             if (error.message && error.message.includes('Network request failed')) {
-                mensagemErro = 'Erro de conexão.Tente novamente.';
+                mensagemErro = 'Erro de conexão. Tente novamente.';
             }
 
             Toast.show({
@@ -83,7 +77,7 @@ export default function LoginScreen({ navigation }) {
 
     return (
         <ImageBackground
-            source={require("../assets/fundoLogin.jpg")}//importa o arquivo local
+            source={require("../assets/fundoLogin.jpg")}
             style={styles.fundo}
             resizeMode="cover"
         >
@@ -120,7 +114,6 @@ export default function LoginScreen({ navigation }) {
         </ImageBackground>
     );
 }
-
 
 const styles = StyleSheet.create({
     fundo: {

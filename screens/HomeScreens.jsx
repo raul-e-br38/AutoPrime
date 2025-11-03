@@ -178,6 +178,7 @@ const HomeScreens = () => {
                     // Renderiza cada produto individualmente
                     produtos.map(item => (
                         <Produto
+                            id={item.id}           // <- ESSENCIAL
                             key={item.id}
                             nome={item.nome}
                             preco={parseFloat(item.preco)}
@@ -185,7 +186,8 @@ const HomeScreens = () => {
                             imagem={item.imagem}
                             marca={item.marca}
                         />
-                    ))
+
+            ))
                 )}
             </View>
 

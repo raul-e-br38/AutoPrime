@@ -7,6 +7,7 @@ import CadastroScreen from "./screens/CadastroScreen";
 import PerfilScreen from './screens/PerfilScreen';
 import Toast from 'react-native-toast-message';
 import ProdutoScreen from "./screens/ProdutoScreen";
+import CarrinhoScreen from "./screens/CarrinhoScreen";
 
 const Stack = createStackNavigator();
 
@@ -19,7 +20,7 @@ export default function App() {
                 <Stack.Screen name="Cadastro" component={CadastroScreen} />
                 <Stack.Screen name="Perfil" component={PerfilScreen} />
                 <Stack.Screen name="Produto" component={ProdutoScreen} />
-
+                <Stack.Screen name="Carrinho" component={CarrinhoScreen} />
             </Stack.Navigator>
 
             <Toast />
