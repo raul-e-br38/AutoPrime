@@ -29,6 +29,17 @@ export default function CarrinhoScreen() {
             console.log("[Carrinho] Dados recebidos:", dados);
 
             if (dados && Array.isArray(dados.carrinho)) {
+                // Log detalhado dos itens para debug
+                console.log("[Carrinho] Itens do carrinho:", dados.carrinho);
+                dados.carrinho.forEach((item, index) => {
+                    console.log(`[Carrinho] Item ${index}:`, {
+                        id_item: item.id_item,
+                        nome: item.nome_produto,
+                        imagem: item.imagem,
+                        imagem_produto: item.imagem_produto,
+                        todas_props: Object.keys(item)
+                    });
+                });
                 setItens(dados.carrinho);
             } else {
                 console.error("[Carrinho] Resposta inválida:", dados);

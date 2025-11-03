@@ -17,7 +17,11 @@ export default function Header({ onSearch }) {
         navigation.navigate('Perfil');
     };
     const home = () => {
-        navigation.navigate('Home');
+        // Reseta a navegação para a Home, forçando recarregamento completo
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+        });
     };
     return (
         <View>

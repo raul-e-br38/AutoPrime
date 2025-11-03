@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useState, useCallback } from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 import Header from "../components/Header";
@@ -12,6 +12,7 @@ import { editarUsuario, getUsuario } from "../services/usuarioService";
 
 const PerfilScreen = () => {
     const navigation = useNavigation();
+    const isFocused = useIsFocused();
 
     const [nome, setNome] = useState("");
     const [email, setEmail] = useState("");
@@ -19,19 +20,30 @@ const PerfilScreen = () => {
     const [senhaConfirmar, setSenhaConfirmar] = useState("");
     const [placeholderNome, setPlaceholderNome] = useState("Nome");
     const [placeholderEmail, setPlaceholderEmail] = useState("Email");
+    const [refreshing, setRefreshing] = useState(false);
+
+    const carregarUsuario = async () => {
+        try {
+            const id = await AsyncStorage.getItem("usuario_id");
+            if (!id) return;
+            const user = await getUsuario(id);
+            if (user.nome) setPlaceholderNome(user.nome);
+            if (user.email) setPlaceholderEmail(user.email);
+        } catch (error) {
+            console.error("Erro ao carregar usuário:", error);
+        } finally {
+            setRefreshing(false);
+        }
+    };
 
     useEffect(() => {
-        async function carregarUsuario() {
-            try {
-                const id = await AsyncStorage.getItem("usuario_id");
-                if (!id) return;
-                const user = await getUsuario(id);
-                if (user.nome) setPlaceholderNome(user.nome);
-                if (user.email) setPlaceholderEmail(user.email);
-            } catch (error) {
-                console.error("Erro ao carregar usuário:", error);
-            }
+        if (isFocused) {
+            carregarUsuario();
         }
+    }, [isFocused]);
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
         carregarUsuario();
     }, []);
 
@@ -77,6 +89,15 @@ const PerfilScreen = () => {
 
             if (nome) await AsyncStorage.setItem("nome", nome);
             if (email) await AsyncStorage.setItem("email", email);
+            
+            // Recarrega os dados do usuário após editar
+            await carregarUsuario();
+            
+            // Limpa os campos após salvar
+            setNome("");
+            setEmail("");
+            setSenha("");
+            setSenhaConfirmar("");
         } catch (error) {
             console.error("Erro ao editar perfil:", error);
             Toast.show({ type: "success", text1: "Perfil atualizado com sucesso" });
@@ -92,7 +113,11 @@ const PerfilScreen = () => {
     }
 
     return (
-        <ScrollView>
+        <ScrollView
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+        >
             <Header />
 
             <View style={styles.container}>
