@@ -192,9 +192,7 @@ const HomeScreens = () => {
             </View>
 
             {/* Rodapé do app */}
-            <View style={styles.fot}>
                 <Footer />
-            </View>
         </ScrollView>
     );
 };
@@ -227,9 +225,7 @@ const styles = StyleSheet.create({
         rowGap: 10,
         marginVertical: 20,
     },
-    fot: {
-        marginTop: 200,
-    },
+
 });
 
 export default HomeScreens;

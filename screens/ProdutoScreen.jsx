@@ -122,9 +122,19 @@ export default function ProdutoScreen() {
 }
 
 const styles = StyleSheet.create({
-    imagem: { alignSelf: 'center', width: '100%', height: 300, resizeMode: 'contain', margin: 10 },
-    imageContainer: { alignItems: 'center', marginBottom: 15 },
-    placeholderContainer: { marginTop: 10, width: 200, height: 200, backgroundColor: colors.cinza, justifyContent: 'center', alignItems: 'center', borderRadius: 5 },
+    imagem: { alignSelf: 'center',
+        width: '100%',
+        height: 300,
+        resizeMode: 'contain',
+        margin: 10 },
+    imageContainer: {
+        alignItems: 'center',
+        marginBottom: 15 },
+    placeholderContainer: {
+        marginTop: 10,
+        width: 200,
+        height: 200,
+        backgroundColor: colors.cinza, justifyContent: 'center', alignItems: 'center', borderRadius: 5 },
     placeholderText: { color: colors.azul_fonte, fontSize: 16, textAlign: 'center' },
     nome: { fontSize: 25, fontWeight: 'light', color: colors.azul_fonte, margin: 10, fontStyle: 'italic' },
     preco: { fontSize: 30, fontWeight: "600", color: colors.azul_fonte, margin: 10 },

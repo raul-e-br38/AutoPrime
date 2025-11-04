@@ -102,11 +102,10 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     imageContainer: { 
-        alignItems: 'center', 
+        alignSelf: 'center',
         marginBottom: 15,
-        position: 'relative',
-        width: 100,
-        height: 100,
+        width:100,
+        height:100,
     },
     foto: { 
         width: 100, 
@@ -150,6 +149,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         borderWidth: 1,
         borderColor: colors.cinza,
+
     },
     placeholderText: { 
         color: colors.cinza_medio, 

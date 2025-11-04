@@ -156,13 +156,41 @@ const PerfilScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { justifyContent: "center", alignItems: "center", margin: 20, gap: 5 },
-    titulo: { fontWeight: "bold", fontSize: 22 },
-    section: { fontWeight: "bold", fontSize: 16, marginVertical: 20, alignSelf: "flex-start" },
-    sair: { backgroundColor: colors.vermelho, paddingVertical: 10, borderRadius: 9, alignItems: "center", width: "50%", marginTop: 10 },
-    sairTxt: { color: colors.branco, fontSize: 20, fontWeight: "bold" },
-    carrinho: { backgroundColor: colors.azul, paddingVertical: 10, borderRadius: 9, alignItems: "center", width: "50%", marginTop: 10 },
-    carrinhoTxt: { color: colors.branco, fontSize: 20, fontWeight: "bold" },
+    container: {
+        justifyContent: "center",
+        alignItems: "center",
+        margin: 20,
+        gap: 5 },
+    titulo: {
+        fontWeight: "bold",
+        fontSize: 22},
+    section: {
+        fontWeight: "bold",
+        fontSize: 16,
+        marginVertical: 20,
+        alignSelf: "flex-start" },
+    sair: {
+        backgroundColor: colors.vermelho,
+        paddingVertical: 10,
+        borderRadius: 9,
+        alignItems: "center",
+        width: "50%",
+        marginTop: 10 },
+    sairTxt: {
+        color: colors.branco,
+        fontSize: 20,
+        fontWeight: "bold" },
+    carrinho: {
+        backgroundColor: colors.azul,
+        paddingVertical: 10,
+        borderRadius: 9,
+        alignItems: "center",
+        width: "50%",
+        marginTop: 10 },
+    carrinhoTxt: {
+        color: colors.branco,
+        fontSize: 20,
+        fontWeight: "bold" },
 });
 
 export default PerfilScreen;

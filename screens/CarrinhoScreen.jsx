@@ -148,16 +148,34 @@ export default function CarrinhoScreen() {
                     ))}
                 </View>
             )}
+            {itens.length === 0 ? (
             <View style={styles.fot}>
-            <Footer />
+                <Footer />
             </View>
+            ) : (
+                <Footer />
+            )}))
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    center: { flex: 1, justifyContent: "center", alignItems: "center", marginTop: 50 },
-    listaProdutos: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", padding: 10 },
-    fot:{marginTop:300},
-    titulo:{fontSize: 20, alignSelf: "center", margin: 10, fontWeight: "bold"},
+    center: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 50
+    },
+    listaProdutos: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+        padding: 10 },
+    fot:{
+        marginTop:300},
+    titulo:{
+        fontSize: 20,
+        alignSelf: "center",
+        margin: 10,
+        fontWeight: "bold"},
 });
