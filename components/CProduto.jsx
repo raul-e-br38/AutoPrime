@@ -3,27 +3,37 @@ import { TouchableOpacity, Text, StyleSheet, Image, View, ActivityIndicator } fr
 import colors from "../design/colors";
 import API_URL from '../services/apiConfig';
 
-export default function CProduto({ nome, marca, quantidade, valor_unitario, valor_total, imagem, id_item, onRemover }) {
+export default function CProduto({ nome, marca, quantidade, valor_unitario, valor_total, imagem, id_item, id_produto, onRemover, onComprar }) {
     const [imageError, setImageError] = useState(false);
     const [imageLoading, setImageLoading] = useState(true);
 
     // Resetar estados quando a imagem mudar
     useEffect(() => {
-        if (imagem) {
+        const imagemLimpa = imagem && typeof imagem === 'string' ? imagem.trim() : null;
+        if (imagemLimpa && imagemLimpa !== 'null' && imagemLimpa !== 'undefined' && imagemLimpa !== '') {
             setImageError(false);
             setImageLoading(true);
+        } else {
+            console.log("[CProduto] Imagem inválida ou vazia:", imagem);
+            setImageError(true);
+            setImageLoading(false);
         }
     }, [imagem]);
 
     // Construir URL da imagem e validar
-    const imageUrl = imagem ? `${API_URL}/static/imagens/${imagem}` : null;
+    // Remove espaços em branco e valores vazios
+    const imagemLimpa = imagem && typeof imagem === 'string' ? imagem.trim() : null;
+    const imageUrl = imagemLimpa && imagemLimpa !== 'null' && imagemLimpa !== 'undefined' && imagemLimpa !== '' 
+        ? `${API_URL}/static/imagens/${imagemLimpa}` 
+        : null;
 
     // Timeout para imagens que demoram muito para carregar
     useEffect(() => {
-        if (imagem && !imageError) {
+        const imagemLimpa = imagem && typeof imagem === 'string' ? imagem.trim() : null;
+        if (imagemLimpa && imagemLimpa !== 'null' && imagemLimpa !== 'undefined' && imagemLimpa !== '' && !imageError) {
             const timeout = setTimeout(() => {
                 if (imageLoading) {
-                    console.log("[CProduto] Timeout ao carregar imagem:", imagem);
+                    console.log("[CProduto] Timeout ao carregar imagem:", imagemLimpa);
                     setImageError(true);
                     setImageLoading(false);
                 }
@@ -52,17 +62,35 @@ export default function CProduto({ nome, marca, quantidade, valor_unitario, valo
         }
     };
 
-    console.log("[CProduto] Renderizando produto:", { nome, imagem, imageUrl, temImagem: !!imagem });
+    const handleComprar = () => {
+        if (onComprar) {
+            onComprar({
+                id_produto,
+                quantidade,
+                valor_unitario,
+                nome
+            });
+        }
+    };
+
+    console.log("[CProduto] Renderizando produto:", { 
+        nome, 
+        imagem_original: imagem, 
+        imagem_limpa: imagemLimpa,
+        imageUrl, 
+        temImagem: !!imagemLimpa,
+        tipo_imagem: typeof imagem
+    });
 
     return (
         <View style={styles.produto}>
             <View style={styles.imageContainer}>
-                {imageLoading && imagem && !imageError && (
+                {imageLoading && imagemLimpa && !imageError && (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="small" color={colors.azul_vibrante} />
                     </View>
                 )}
-                {!imageError && imagem && imageUrl ? (
+                {!imageError && imagemLimpa && imageUrl ? (
                     <Image
                         style={[styles.foto, imageLoading && styles.fotoLoading]}
                         source={{ uri: imageUrl }}
@@ -83,6 +111,12 @@ export default function CProduto({ nome, marca, quantidade, valor_unitario, valo
             <Text style={styles.preco}>Preço Uni: R$ {parseFloat(valor_unitario || 0).toFixed(2)}</Text>
             <Text style={styles.preco}>Preço Total: R$ {parseFloat(valor_total || 0).toFixed(2)}</Text>
             <Text style={styles.quantidade}>Qtd: {quantidade || 0}</Text>
+            
+            {onComprar && (
+                <TouchableOpacity style={styles.btnComprar} onPress={handleComprar}>
+                    <Text style={styles.btnComprarText}>Comprar</Text>
+                </TouchableOpacity>
+            )}
             
             {onRemover && (
                 <TouchableOpacity style={styles.btnRemover} onPress={handleRemover}>
@@ -127,6 +161,20 @@ const styles = StyleSheet.create({
     marca: { color: colors.azul_fonte,  fontWeight: "500", marginBottom: 5 },
     preco: { color: colors.azul_fonte, fontWeight: "bold", marginBottom: 5 },
     quantidade: { color: colors.azul_fonte, fontWeight: "500", marginBottom: 10 },
+    btnComprar: {
+        backgroundColor: colors.azul,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginTop: 5,
+        marginBottom: 5,
+    },
+    btnComprarText: {
+        color: colors.branco,
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
     btnRemover: {
         backgroundColor: colors.azul_vibrante,
         paddingVertical: 8,
