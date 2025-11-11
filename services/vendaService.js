@@ -1,5 +1,31 @@
 import API_URL from './apiConfig';
 
+// Helper: fetch com timeout e retries exponenciais
+async function fetchWithRetry(url, options = {}, { retries = 3, timeoutMs = 9000, backoffMs = 600 } = {}) {
+    let lastError;
+    for (let attempt = 0; attempt < retries; attempt++) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            const response = await fetch(url, { ...options, signal: controller.signal });
+            clearTimeout(timeoutId);
+            return response;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            lastError = error;
+            const isAbort = error?.name === 'AbortError';
+            const isNetworkError = String(error?.message || '').toLowerCase().includes('network request failed');
+            if (attempt < retries - 1 && (isAbort || isNetworkError)) {
+                const delay = backoffMs * Math.pow(2, attempt) + Math.floor(Math.random() * 250);
+                await new Promise(res => setTimeout(res, delay));
+                continue;
+            }
+            throw error;
+        }
+    }
+    throw lastError;
+}
+
 const vendaService = {
     /**
      * Lista todas as vendas registradas
@@ -7,7 +33,14 @@ const vendaService = {
      */
     async listarVendas() {
         try {
-            const response = await fetch(`${API_URL}/vendas`);
+            const response = await fetchWithRetry(`${API_URL}/vendas`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                },
+            });
             if (!response.ok) {
                 const data = await response.json().catch(() => ({}));
                 throw new Error(data.erro || `Erro ao buscar vendas (status ${response.status})`);
@@ -30,18 +63,27 @@ const vendaService = {
      */
     async registrarVenda(email_cliente, id_produto, quantidade, valor_unitario) {
         try {
-            const response = await fetch(`${API_URL}/venda`, {
+            const payload = {
+                email_cliente: String(email_cliente),
+                id_produto: Number(id_produto),
+                quantidade: Number(quantidade),
+                valor_unitario: Number(valor_unitario),
+            };
+
+            const response = await fetchWithRetry(`${API_URL}/venda`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email_cliente,
-                    id_produto,
-                    quantidade,
-                    valor_unitario
-                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                },
+                body: JSON.stringify(payload),
             });
 
-            const data = await response.json();
+            const raw = await response.text();
+            let data;
+            try { data = JSON.parse(raw); } catch { data = { raw }; }
 
             if (!response.ok) {
                 throw new Error(data.erro || `Erro ao registrar venda (status ${response.status})`);
@@ -56,4 +98,8 @@ const vendaService = {
 };
 
 export default vendaService;
+
+
+
+
 

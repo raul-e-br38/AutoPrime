@@ -3,7 +3,7 @@ import { TouchableOpacity, Text, StyleSheet, Image, View, ActivityIndicator } fr
 import colors from "../design/colors";
 import API_URL from '../services/apiConfig';
 
-export default function CProduto({ nome, marca, quantidade, valor_unitario, valor_total, imagem, id_item, id_produto, onRemover, onComprar }) {
+export default function CProduto({ nome, marca, quantidade, valor_unitario, valor_total, imagem, id_item, id_produto, onRemover, onComprar, onIncrement, onDecrement }) {
     const [imageError, setImageError] = useState(false);
     const [imageLoading, setImageLoading] = useState(true);
 
@@ -65,6 +65,7 @@ export default function CProduto({ nome, marca, quantidade, valor_unitario, valo
     const handleComprar = () => {
         if (onComprar) {
             onComprar({
+                id_item,
                 id_produto,
                 quantidade,
                 valor_unitario,
@@ -105,13 +106,14 @@ export default function CProduto({ nome, marca, quantidade, valor_unitario, valo
                     </View>
                 )}
             </View>
-
-            <Text style={styles.nome}>{nome || 'Produto'}</Text>
-            <Text style={styles.marca}>Marca: {marca || 'N/A'}</Text>
-            <Text style={styles.preco}>Preço Uni: R$ {parseFloat(valor_unitario || 0).toFixed(2)}</Text>
-            <Text style={styles.preco}>Preço Total: R$ {parseFloat(valor_total || 0).toFixed(2)}</Text>
-            <Text style={styles.quantidade}>Qtd: {quantidade || 0}</Text>
-            
+            <View style={styles.infos}>
+                <Text style={styles.nome}>{nome || 'Produto'}</Text>
+                <Text style={styles.marca}>Marca: {marca || 'N/A'}</Text>
+                <Text style={styles.preco}>Preço Uni: R$ {parseFloat(valor_unitario || 0).toFixed(2)}</Text>
+                <Text style={styles.preco}>Preço Total: R$ {parseFloat(valor_total || 0).toFixed(2)}</Text>
+                <Text style={styles.quantidade}>Qtd: {quantidade || 0}</Text>
+            </View>
+            <View style={styles.botoes}>
             {onComprar && (
                 <TouchableOpacity style={styles.btnComprar} onPress={handleComprar}>
                     <Text style={styles.btnComprarText}>Comprar</Text>
@@ -123,6 +125,17 @@ export default function CProduto({ nome, marca, quantidade, valor_unitario, valo
                     <Text style={styles.btnRemoverText}>Remover</Text>
                 </TouchableOpacity>
             )}
+            {/*Colocar opção de diminuir e aumentar quantidade*/}
+            <View style={styles.qtdRow}>
+                <TouchableOpacity style={styles.qtdBtn} onPress={() => onDecrement && onDecrement({ id_item, id_produto, quantidade })}>
+                    <Text style={styles.qtdBtnText}>-</Text>
+                </TouchableOpacity>
+                <Text style={styles.quantidadeValor}>{quantidade || 0}</Text>
+                <TouchableOpacity style={styles.qtdBtn} onPress={() => onIncrement && onIncrement({ id_item, id_produto, quantidade })}>
+                    <Text style={styles.qtdBtnText}>+</Text>
+                </TouchableOpacity>
+            </View>
+            </View>
         </View>
     );
 }
@@ -130,14 +143,18 @@ export default function CProduto({ nome, marca, quantidade, valor_unitario, valo
 const styles = StyleSheet.create({
     produto: {
         backgroundColor: colors.branco,
-        padding: 20,
-        width: '48%',
+        padding: 16,
+        width: '95%',
         borderRadius: 5,
         marginBottom: 10,
+        alignSelf: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     imageContainer: { 
-        alignSelf: 'center',
-        marginBottom: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
         width:100,
         height:100,
     },
@@ -157,10 +174,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         zIndex: 1,
     },
-    nome: { color: colors.azul_fonte, fontWeight: "500", marginBottom: 5 },
-    marca: { color: colors.azul_fonte,  fontWeight: "500", marginBottom: 5 },
-    preco: { color: colors.azul_fonte, fontWeight: "bold", marginBottom: 5 },
-    quantidade: { color: colors.azul_fonte, fontWeight: "500", marginBottom: 10 },
+    nome: { color: colors.azul_fonte, fontWeight: "500",  },
+    marca: { color: colors.azul_fonte,  fontWeight: "500",  },
+    preco: { color: colors.azul_fonte, fontWeight: "bold", },
+    quantidade: { color: colors.azul_fonte, fontWeight: "500", },
     btnComprar: {
         backgroundColor: colors.azul,
         paddingVertical: 8,
@@ -188,11 +205,11 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
     },
-    placeholderContainer: { 
-        width: 100, 
-        height: 100, 
-        backgroundColor: colors.cinza_claro, 
-        justifyContent: 'center', 
+    placeholderContainer: {
+        width: 100,
+        height: 100,
+        backgroundColor: colors.cinza_claro,
+        justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 5,
         borderWidth: 1,
@@ -205,4 +222,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingHorizontal: 5,
     },
+    infos:{ flex: 1 },
+    botoes:{
+        flex: 1
+    },
+    qtdRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', marginTop: 6 },
+    qtdBtn: { backgroundColor: colors.azul_vibrante, width: 28, height: 28, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
+    qtdBtnText: { color: colors.branco, fontSize: 16, fontWeight: 'bold' },
+    quantidadeValor: { color: colors.azul_fonte, fontWeight: "bold", marginHorizontal: 10, minWidth: 26, textAlign: 'center' }
 });

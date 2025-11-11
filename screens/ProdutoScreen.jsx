@@ -57,7 +57,7 @@ export default function ProdutoScreen() {
             }
         } catch (error) {
             console.error("[Carrinho] Erro inesperado:", error);
-            Toast.show({ type: "success", text1: "Produto Adicionado" });
+            Toast.show({ type: "success", text1: response.mensagem || "Produto adicionado!" });
         }
     };
 
