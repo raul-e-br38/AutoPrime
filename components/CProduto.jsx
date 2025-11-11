@@ -107,11 +107,11 @@ export default function CProduto({ nome, marca, quantidade, valor_unitario, valo
                 )}
             </View>
             <View style={styles.infos}>
-                <Text style={styles.nome}>{nome || 'Produto'}</Text>
-                <Text style={styles.marca}>Marca: {marca || 'N/A'}</Text>
-                <Text style={styles.preco}>Preço Uni: R$ {parseFloat(valor_unitario || 0).toFixed(2)}</Text>
-                <Text style={styles.preco}>Preço Total: R$ {parseFloat(valor_total || 0).toFixed(2)}</Text>
-                <Text style={styles.quantidade}>Qtd: {quantidade || 0}</Text>
+            <Text style={styles.nome}>{nome || 'Produto'}</Text>
+            <Text style={styles.marca}>Marca: {marca || 'N/A'}</Text>
+            <Text style={styles.preco}>Preço Uni: R$ {parseFloat(valor_unitario || 0).toFixed(2)}</Text>
+            <Text style={styles.preco}>Preço Total: R$ {parseFloat(valor_total || 0).toFixed(2)}</Text>
+            <Text style={styles.quantidade}>Qtd: {quantidade || 0}</Text>
             </View>
             <View style={styles.botoes}>
             {onComprar && (
@@ -205,11 +205,11 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
     },
-    placeholderContainer: {
-        width: 100,
-        height: 100,
-        backgroundColor: colors.cinza_claro,
-        justifyContent: 'center',
+    placeholderContainer: { 
+        width: 100, 
+        height: 100, 
+        backgroundColor: colors.cinza_claro, 
+        justifyContent: 'center', 
         alignItems: 'center',
         borderRadius: 5,
         borderWidth: 1,
