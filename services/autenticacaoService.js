@@ -19,14 +19,31 @@ export async function login(email, senha) {
             // Corpo da requisição com os dados (email e senha) convertidos para formato JSON.
         });
 
-        const data = await response.json();
-        // Espera a resposta e a converte para um objeto JavaScript a partir do formato JSON.
+        // Verifica o Content-Type antes de fazer parse
+        const contentType = response.headers.get("content-type");
+        let data;
+        
+        if (contentType && contentType.includes("application/json")) {
+            // Se for JSON, faz o parse normalmente
+            data = await response.json();
+        } else {
+            // Se não for JSON (provavelmente HTML de erro), lê como texto
+            const text = await response.text();
+            console.error("[Login] Resposta não-JSON recebida:", text.substring(0, 200));
+            throw new Error(`Erro no servidor (${response.status}). Verifique se a API está funcionando.`);
+        }
 
         if (!response.ok) {
             // Se a resposta não for bem-sucedida
+            // Log detalhado para diagnóstico
+            console.error("[Login] Erro na resposta:", {
+                status: response.status,
+                statusText: response.statusText,
+                data: data
+            });
             // lança um erro com a mensagem contida no campo 'error' da resposta.
-            throw new Error(data.error || "Erro ao fazer login");
-
+            const mensagemErro = data.error || data.erro || `Erro no servidor (${response.status})`;
+            throw new Error(mensagemErro);
         }
 
         return data;
@@ -36,7 +53,6 @@ export async function login(email, senha) {
         // Caso ocorra algum erro (seja na requisição ou no processo de conversão da resposta),
         // ele será lançado para ser tratado fora da função.
         throw error;
-
     }
 }
 
@@ -55,13 +71,24 @@ export async function cadastro(nome, email, cargo, senha) {
             // Corpo da requisição com os dados do novo usuário, convertidos para o formato JSON.
         });
 
-        const data = await response.json();
-        // Converte a resposta da API em um objeto JavaScript.
+        // Verifica o Content-Type antes de fazer parse
+        const contentType = response.headers.get("content-type");
+        let data;
+        
+        if (contentType && contentType.includes("application/json")) {
+            // Se for JSON, faz o parse normalmente
+            data = await response.json();
+        } else {
+            // Se não for JSON (provavelmente HTML de erro), lê como texto
+            const text = await response.text();
+            console.error("[Cadastro] Resposta não-JSON recebida:", text.substring(0, 200));
+            throw new Error(`Erro no servidor (${response.status}). Verifique se a API está funcionando.`);
+        }
 
         if (!response.ok) {
             // Se a resposta não for bem-sucedida
             // lança um erro com a mensagem de erro recebida da resposta.
-            throw new Error(data.error || "Erro ao cadastrar");
+            throw new Error(data.error || data.erro || "Erro ao cadastrar");
         }
 
         return data;

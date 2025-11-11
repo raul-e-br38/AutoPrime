@@ -1,7 +1,7 @@
 import API_URL from './apiConfig';
 
-// Helper: fetch com timeout e retries exponenciais
-async function fetchWithRetry(url, options = {}, { retries = 3, timeoutMs = 9000, backoffMs = 600 } = {}) {
+// Helper: fetch com timeout e retries exponenciais (ULTRA ROBUSTO - FORÇA CONEXÃO)
+async function fetchWithRetry(url, options = {}, { retries = 10, timeoutMs = 30000, backoffMs = 500 } = {}) {
     let lastError;
     for (let attempt = 0; attempt < retries; attempt++) {
         const controller = new AbortController();
@@ -9,14 +9,25 @@ async function fetchWithRetry(url, options = {}, { retries = 3, timeoutMs = 9000
         try {
             const response = await fetch(url, { ...options, signal: controller.signal });
             clearTimeout(timeoutId);
-            return response;
+            // Verifica se a resposta é válida
+            if (response.ok || response.status < 500) {
+                return response;
+            }
+            // Se status de erro, tenta novamente
+            throw new Error(`HTTP ${response.status}`);
         } catch (error) {
             clearTimeout(timeoutId);
             lastError = error;
             const isAbort = error?.name === 'AbortError';
             const isNetworkError = String(error?.message || '').toLowerCase().includes('network request failed');
-            if (attempt < retries - 1 && (isAbort || isNetworkError)) {
-                const delay = backoffMs * Math.pow(2, attempt) + Math.floor(Math.random() * 250);
+            const isTimeout = isAbort || isNetworkError || error?.message?.includes('HTTP');
+            
+            if (attempt < retries - 1 && isTimeout) {
+                // Backoff exponencial mais curto inicialmente: 500ms, 1000ms, 2000ms, 4000ms...
+                const delay = backoffMs * Math.pow(2, attempt) + Math.floor(Math.random() * 300);
+                if (attempt === 0) {
+                    console.log(`[fetchWithRetry] Tentando conectar... (${attempt + 1}/${retries})`);
+                }
                 await new Promise(res => setTimeout(res, delay));
                 continue;
             }
@@ -79,7 +90,7 @@ const vendaService = {
                     'Pragma': 'no-cache',
                 },
                 body: JSON.stringify(payload),
-            });
+                }, { retries: 10, timeoutMs: 30000, backoffMs: 500 });
 
             const raw = await response.text();
             let data;

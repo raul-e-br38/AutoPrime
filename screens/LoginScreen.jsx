@@ -62,15 +62,21 @@ export default function LoginScreen({ navigation }) {
 
         } catch (error) {
             let mensagemErro = 'Erro ao fazer login, tente novamente.';
-            console.error(error);
-            if (error.message && error.message.includes('Network request failed')) {
-                mensagemErro = 'Erro de conexão. Tente novamente.';
+            console.error("[LoginScreen] Erro completo:", error);
+            console.error("[LoginScreen] Mensagem de erro:", error.message);
+            
+            // Usa a mensagem específica do erro se disponível
+            if (error.message) {
+                mensagemErro = error.message;
+            } else if (error.message && error.message.includes('Network request failed')) {
+                mensagemErro = 'Erro de conexão. Verifique se a API está rodando.';
             }
 
             Toast.show({
                 type: 'error',
-                text1: 'Erro',
+                text1: 'Erro no Login',
                 text2: mensagemErro,
+                visibilityTime: 4000,
             });
         }
     };
