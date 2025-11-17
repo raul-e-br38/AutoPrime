@@ -1,3 +1,13 @@
 Conta teste:
 teco@gmail.com
 Txt1234@
+
+
+ )}
+            {itens.length <= 2 ? (
+            <View style={styles.fot}>
+                <Footer />
+            </View>
+            ) : (
+                <Footer />
+            )}
