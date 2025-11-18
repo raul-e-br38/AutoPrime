@@ -9,6 +9,7 @@ import Input from "../components/Input";
 import BtnEnviar from "../components/BtnEnviar";
 import colors from "../design/colors";
 import { editarUsuario, getUsuario } from "../services/usuarioService";
+import cashbackService from "../services/cashbackService";
 
 const PerfilScreen = () => {
     const navigation = useNavigation();
@@ -21,16 +22,42 @@ const PerfilScreen = () => {
     const [placeholderNome, setPlaceholderNome] = useState("Nome");
     const [placeholderEmail, setPlaceholderEmail] = useState("Email");
     const [refreshing, setRefreshing] = useState(false);
+    const [cashback, setCashback] = useState(0.00);
 
     const carregarUsuario = async () => {
+        setRefreshing(true); // Ativa o refreshing antes de começar
+        let userId = null;
         try {
-            const id = await AsyncStorage.getItem("usuario_id");
-            if (!id) return;
-            const user = await getUsuario(id);
+            const idString = await AsyncStorage.getItem("usuario_id");
+            if (!idString) return;
+
+            // ✅ CORREÇÃO CRÍTICA: Converte o ID de string para número (inteiro)
+            const id = parseInt(idString, 10);
+
+            if (isNaN(id)) {
+                console.error("ID do Usuário não é um número válido:", idString);
+                return;
+            }
+
+            userId = id;
+
+            console.log("LOG CRÍTICO 1: ID do Usuário Carregado (para cashback):", userId);
+
+            // Carrega dados de perfil
+            const user = await getUsuario(idString); // Mantém string para serviços que usam string ID
             if (user.nome) setPlaceholderNome(user.nome);
             if (user.email) setPlaceholderEmail(user.email);
+
+            // 💰 Carrega o Cashback
+            const totalCashback = await cashbackService.getCashbackTotal(userId);
+
+            console.log("LOG CRÍTICO 2: Cashback Recebido da API:", totalCashback);
+
+            setCashback(totalCashback);
+
         } catch (error) {
-            console.error("Erro ao carregar usuário:", error);
+            console.error("Erro ao carregar dados do usuário ou cashback:", error);
+            Toast.show({ type: "error", text1: "Erro ao carregar dados" });
         } finally {
             setRefreshing(false);
         }
@@ -89,10 +116,10 @@ const PerfilScreen = () => {
 
             if (nome) await AsyncStorage.setItem("nome", nome);
             if (email) await AsyncStorage.setItem("email", email);
-            
-            // Recarrega os dados do usuário após editar
+
+            // Recarrega os dados do usuário e o cashback após editar
             await carregarUsuario();
-            
+
             // Limpa os campos após salvar
             setNome("");
             setEmail("");
@@ -100,9 +127,10 @@ const PerfilScreen = () => {
             setSenhaConfirmar("");
         } catch (error) {
             console.error("Erro ao editar perfil:", error);
-            Toast.show({ type: "success", text1: "Perfil atualizado com sucesso" });
+            Toast.show({ type: "error", text1: "Erro ao atualizar perfil" });
         }
     }
+
 
     async function handleLogout() {
         await AsyncStorage.clear();
@@ -122,6 +150,13 @@ const PerfilScreen = () => {
 
             <View style={styles.container}>
                 <Text style={styles.titulo}>Seu Perfil</Text>
+
+                {/* 💰 Exibição do Cashback */}
+                <View style={styles.cashbackContainer}>
+                    <Text style={styles.cashbackLabel}>Cashback Acumulado:</Text>
+                    <Text style={styles.cashbackValue}>R$ {cashback.toFixed(2)}</Text>
+                </View>
+
                 {/* Botão para ir ao carrinho */}
                 <TouchableOpacity
                     style={styles.carrinho}
@@ -129,6 +164,7 @@ const PerfilScreen = () => {
                 >
                     <Text style={styles.carrinhoTxt}>Ir para o Carrinho</Text>
                 </TouchableOpacity>
+
                 <Text style={styles.section}>Alterar Dados de Usuário</Text>
                 <Input placeholder={placeholderNome} value={nome} onChangeText={setNome} />
                 <Input placeholder={placeholderEmail} value={email} onChangeText={setEmail} />
@@ -138,8 +174,6 @@ const PerfilScreen = () => {
                 <Input placeholder="Confirmar Nova Senha" value={senhaConfirmar} onChangeText={setSenhaConfirmar} secureTextEntry />
 
                 <BtnEnviar title="Salvar Mudanças" onPress={editar} />
-
-
 
                 <TouchableOpacity onPress={handleLogout} style={styles.sair}>
                     <Text style={styles.sairTxt}>Sair</Text>
@@ -163,7 +197,9 @@ const styles = StyleSheet.create({
         gap: 5 },
     titulo: {
         fontWeight: "bold",
-        fontSize: 22},
+        fontSize: 22,
+        marginBottom: 10
+    },
     section: {
         fontWeight: "bold",
         fontSize: 16,
@@ -191,6 +227,28 @@ const styles = StyleSheet.create({
         color: colors.branco,
         fontSize: 20,
         fontWeight: "bold" },
+    // 💰 Novos estilos para o Cashback
+    cashbackContainer: {
+        backgroundColor: colors.verde_claro,
+        padding: 15,
+        borderRadius: 10,
+        width: "80%",
+        alignItems: "center",
+        marginVertical: 10,
+        borderWidth: 1,
+        borderColor: colors.verde,
+    },
+    cashbackLabel: {
+        fontSize: 16,
+        color: colors.verde,
+        fontWeight: "600",
+    },
+    cashbackValue: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: colors.verde_escuro,
+        marginTop: 5,
+    }
 });
 
 export default PerfilScreen;

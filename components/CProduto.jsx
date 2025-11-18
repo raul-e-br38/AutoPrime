@@ -1,233 +1,150 @@
-import React, { useState, useEffect } from 'react';
-import { TouchableOpacity, Text, StyleSheet, Image, View, ActivityIndicator } from 'react-native';
-import colors from "../design/colors";
-import API_URL from '../services/apiConfig';
+import React, { useState } from "react";
+import { View, Text, Image, TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import Colors from "../design/colors";
+import API_URL from "../services/apiConfig";
 
-export default function CProduto({ nome, marca, quantidade, valor_unitario, valor_total, imagem, id_item, id_produto, onRemover, onComprar, onIncrement, onDecrement }) {
-    const [imageError, setImageError] = useState(false);
-    const [imageLoading, setImageLoading] = useState(true);
+export default function CProduto({
+                                     nome,
+                                     quantidade,
+                                     valor_total,
+                                     imagem,
+                                     id_item,
+                                     onIncrement,
+                                     onDecrement,
+                                     onRemover
+                                 }) {
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
-    // Resetar estados quando a imagem mudar
-    useEffect(() => {
-        const imagemLimpa = imagem && typeof imagem === 'string' ? imagem.trim() : null;
-        if (imagemLimpa && imagemLimpa !== 'null' && imagemLimpa !== 'undefined' && imagemLimpa !== '') {
-            setImageError(false);
-            setImageLoading(true);
-        } else {
-            console.log("[CProduto] Imagem inválida ou vazia:", imagem);
-            setImageError(true);
-            setImageLoading(false);
-        }
-    }, [imagem]);
+    const imagemLimpa =
+        imagem && typeof imagem === "string" && imagem.trim() !== "" && imagem !== "null"
+            ? imagem.trim()
+            : null;
 
-    // Construir URL da imagem e validar
-    // Remove espaços em branco e valores vazios
-    const imagemLimpa = imagem && typeof imagem === 'string' ? imagem.trim() : null;
-    const imageUrl = imagemLimpa && imagemLimpa !== 'null' && imagemLimpa !== 'undefined' && imagemLimpa !== '' 
-        ? `${API_URL}/static/imagens/${imagemLimpa}` 
-        : null;
-
-    // Timeout para imagens que demoram muito para carregar
-    useEffect(() => {
-        const imagemLimpa = imagem && typeof imagem === 'string' ? imagem.trim() : null;
-        if (imagemLimpa && imagemLimpa !== 'null' && imagemLimpa !== 'undefined' && imagemLimpa !== '' && !imageError) {
-            const timeout = setTimeout(() => {
-                if (imageLoading) {
-                    console.log("[CProduto] Timeout ao carregar imagem:", imagemLimpa);
-                    setImageError(true);
-                    setImageLoading(false);
-                }
-            }, 10000); // 10 segundos de timeout
-
-            return () => clearTimeout(timeout);
-        }
-    }, [imagem, imageLoading, imageError]);
-
-    const handleImageError = () => {
-        console.log("[CProduto] Erro ao carregar imagem:", imagem);
-        console.log("[CProduto] URL tentada:", imageUrl);
-        setImageError(true);
-        setImageLoading(false);
-    };
-
-    const handleImageLoad = () => {
-        console.log("[CProduto] Imagem carregada com sucesso:", imagem);
-        setImageLoading(false);
-        setImageError(false);
-    };
-
-    const handleRemover = () => {
-        if (onRemover && id_item) {
-            onRemover(id_item);
-        }
-    };
-
-    const handleComprar = () => {
-        if (onComprar) {
-            onComprar({
-                id_item,
-                id_produto,
-                quantidade,
-                valor_unitario,
-                nome
-            });
-        }
-    };
-
-    console.log("[CProduto] Renderizando produto:", { 
-        nome, 
-        imagem_original: imagem, 
-        imagem_limpa: imagemLimpa,
-        imageUrl, 
-        temImagem: !!imagemLimpa,
-        tipo_imagem: typeof imagem
-    });
+    const imageUrl = imagemLimpa ? `${API_URL}/static/imagens/${imagemLimpa}` : null;
 
     return (
-        <View style={styles.produto}>
-            <View style={styles.imageContainer}>
-                {imageLoading && imagemLimpa && !imageError && (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="small" color={colors.azul_vibrante} />
-                    </View>
+        <View style={styles.container}>
+            <View style={styles.imageWrapper}>
+                {loading && !error && (
+                    <ActivityIndicator size="small" color={Colors.azul_vibrante} />
                 )}
-                {!imageError && imagemLimpa && imageUrl ? (
+
+                {!error && imageUrl ? (
                     <Image
-                        style={[styles.foto, imageLoading && styles.fotoLoading]}
                         source={{ uri: imageUrl }}
-                        onError={handleImageError}
-                        onLoad={handleImageLoad}
-                        onLoadStart={() => setImageLoading(true)}
+                        style={[styles.image, loading && { opacity: 0.4 }]}
+                        onLoad={() => setLoading(false)}
+                        onError={() => {
+                            setError(true);
+                            setLoading(false);
+                        }}
                         resizeMode="contain"
                     />
                 ) : (
-                    <View style={styles.placeholderContainer}>
-                        <Text style={styles.placeholderText}>Erro ao carregar a imagem</Text>
+                    <View style={styles.fallback}>
+                        <Text style={styles.fallbackText}>Erro ao carregar imagem</Text>
                     </View>
                 )}
             </View>
-            <View style={styles.infos}>
-            <Text style={styles.nome}>{nome || 'Produto'}</Text>
-            <Text style={styles.marca}>Marca: {marca || 'N/A'}</Text>
-            <Text style={styles.preco}>Preço Uni: R$ {parseFloat(valor_unitario || 0).toFixed(2)}</Text>
-            <Text style={styles.preco}>Preço Total: R$ {parseFloat(valor_total || 0).toFixed(2)}</Text>
-            <Text style={styles.quantidade}>Qtd: {quantidade || 0}</Text>
+
+            <View style={styles.info}>
+                <Text style={styles.name}>{nome}</Text>
+                <Text style={styles.price}>R$ {valor_total.toFixed(2)}</Text>
+
+                <View style={styles.row}>
+                    <TouchableOpacity
+                        style={styles.qtdBtn}
+                        onPress={() => onDecrement(id_item, quantidade)}
+                    >
+                        <Text style={styles.qtdText}>-</Text>
+                    </TouchableOpacity>
+
+                    <Text style={styles.qtdNumber}>{quantidade}</Text>
+
+                    <TouchableOpacity
+                        style={styles.qtdBtn}
+                        onPress={() => onIncrement(id_item, quantidade)}
+                    >
+                        <Text style={styles.qtdText}>+</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-            <View style={styles.botoes}>
-            {onComprar && (
-                <TouchableOpacity style={styles.btnComprar} onPress={handleComprar}>
-                    <Text style={styles.btnComprarText}>Comprar</Text>
-                </TouchableOpacity>
-            )}
-            
-            {onRemover && (
-                <TouchableOpacity style={styles.btnRemover} onPress={handleRemover}>
-                    <Text style={styles.btnRemoverText}>Remover</Text>
-                </TouchableOpacity>
-            )}
-            {/*Colocar opção de diminuir e aumentar quantidade*/}
-            <View style={styles.qtdRow}>
-                <TouchableOpacity style={styles.qtdBtn} onPress={() => onDecrement && onDecrement({ id_item, id_produto, quantidade })}>
-                    <Text style={styles.qtdBtnText}>-</Text>
-                </TouchableOpacity>
-                <Text style={styles.quantidadeValor}>{quantidade || 0}</Text>
-                <TouchableOpacity style={styles.qtdBtn} onPress={() => onIncrement && onIncrement({ id_item, id_produto, quantidade })}>
-                    <Text style={styles.qtdBtnText}>+</Text>
-                </TouchableOpacity>
-            </View>
-            </View>
+
+            <TouchableOpacity onPress={() => onRemover(id_item)}>
+                <Ionicons name="trash-bin" size={26} color={Colors.red} />
+            </TouchableOpacity>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    produto: {
-        backgroundColor: colors.branco,
-        padding: 16,
-        width: '95%',
-        borderRadius: 5,
-        marginBottom: 10,
-        alignSelf: 'center',
-        flexDirection: 'row',
-        alignItems: 'center',
+    container: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: Colors.white,
+        padding: 12,
+        borderRadius: 10,
+        marginBottom: 12,
+        marginHorizontal: 10
     },
-    imageContainer: { 
-        alignItems: 'center',
-        justifyContent: 'center',
+    imageWrapper: {
+        width: 70,
+        height: 70,
+        borderRadius: 8,
         marginRight: 12,
-        width:100,
-        height:100,
+        justifyContent: "center",
+        alignItems: "center"
     },
-    foto: { 
-        width: 100, 
-        height: 100, 
-        resizeMode: 'contain',
+    image: {
+        width: 70,
+        height: 70
     },
-    fotoLoading: {
-        opacity: 0.3,
+    fallback: {
+        width: 70,
+        height: 70,
+        backgroundColor: Colors.cinza_claro,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 8
     },
-    loadingContainer: {
-        position: 'absolute',
-        width: 100,
-        height: 100,
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1,
+    fallbackText: {
+        fontSize: 9,
+        color: Colors.cinza_medio,
+        textAlign: "center"
     },
-    nome: { color: colors.azul_fonte, fontWeight: "500",  },
-    marca: { color: colors.azul_fonte,  fontWeight: "500",  },
-    preco: { color: colors.azul_fonte, fontWeight: "bold", },
-    quantidade: { color: colors.azul_fonte, fontWeight: "500", },
-    btnComprar: {
-        backgroundColor: colors.azul,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 5,
-        alignItems: 'center',
-        marginTop: 5,
-        marginBottom: 5,
-    },
-    btnComprarText: {
-        color: colors.branco,
-        fontSize: 14,
-        fontWeight: 'bold',
-    },
-    btnRemover: {
-        backgroundColor: colors.azul_vibrante,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 5,
-        alignItems: 'center',
-        marginTop: 5,
-    },
-    btnRemoverText: {
-        color: colors.branco,
-        fontSize: 14,
-        fontWeight: 'bold',
-    },
-    placeholderContainer: { 
-        width: 100, 
-        height: 100, 
-        backgroundColor: colors.cinza_claro, 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        borderRadius: 5,
-        borderWidth: 1,
-        borderColor: colors.cinza,
-
-    },
-    placeholderText: { 
-        color: colors.cinza_medio, 
-        fontSize: 10, 
-        textAlign: 'center',
-        paddingHorizontal: 5,
-    },
-    infos:{ flex: 1 },
-    botoes:{
+    info: {
         flex: 1
     },
-    qtdRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', marginTop: 6 },
-    qtdBtn: { backgroundColor: colors.azul_vibrante, width: 28, height: 28, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
-    qtdBtnText: { color: colors.branco, fontSize: 16, fontWeight: 'bold' },
-    quantidadeValor: { color: colors.azul_fonte, fontWeight: "bold", marginHorizontal: 10, minWidth: 26, textAlign: 'center' }
+    name: {
+        fontSize: 16,
+        fontWeight: "bold"
+    },
+    price: {
+        fontSize: 14,
+        color: Colors.azul_vibrante
+    },
+    row: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 6
+    },
+    qtdBtn: {
+        width: 28,
+        height: 28,
+        borderRadius: 6,
+        backgroundColor: Colors.cinza_claro,
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    qtdText: {
+        fontSize: 18,
+        fontWeight: "bold"
+    },
+    qtdNumber: {
+        fontSize: 16,
+        fontWeight: "bold",
+        marginHorizontal: 10
+    }
 });
