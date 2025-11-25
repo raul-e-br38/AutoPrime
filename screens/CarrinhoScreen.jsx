@@ -21,13 +21,13 @@ import API_URL from "../services/apiConfig";
 export default function CarrinhoScreen({ navigation }) {
     const [email, setEmail] = useState("");
     const [carrinhoItems, setCarrinhoItems] = useState([]);
+    const [totalCarrinho, setTotalCarrinho] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         carregarEmail();
     }, []);
 
-    // sempre que o email mudar, recarrega o carrinho
     useEffect(() => {
         if (email) carregarCarrinho(email);
     }, [email]);
@@ -48,7 +48,13 @@ export default function CarrinhoScreen({ navigation }) {
         try {
             setIsLoading(true);
             const data = await carrinhoService.listarCarrinho(emailCliente);
-            setCarrinhoItems(data.carrinho || []);
+            const itens = data.carrinho || [];
+
+            setCarrinhoItems(itens);
+
+            const total = itens.reduce((sum, item) => sum + item.valor_total, 0);
+            setTotalCarrinho(total);
+
         } catch (error) {
             console.log("ERRO AO CARREGAR CARRINHO:", error);
         } finally {
@@ -131,9 +137,7 @@ export default function CarrinhoScreen({ navigation }) {
 
             <View style={{ flex: 1, marginLeft: 10 }}>
                 <Text style={styles.itemName}>{item.nome_produto}</Text>
-                <Text style={styles.itemPrice}>
-                    R$ {item.valor_total.toFixed(2)}
-                </Text>
+                <Text style={styles.itemPrice}>R$ {item.valor_total.toFixed(2)}</Text>
 
                 <View style={styles.qtdContainer}>
                     <TouchableOpacity
@@ -171,7 +175,6 @@ export default function CarrinhoScreen({ navigation }) {
         <View style={{ flex: 1, backgroundColor: Colors.background }}>
             <Header />
 
-            {/* INPUT DO EMAIL DO CLIENTE */}
             <TextInput
                 style={styles.inputEmail}
                 placeholder="E-mail do cliente"
@@ -180,6 +183,12 @@ export default function CarrinhoScreen({ navigation }) {
                 autoCapitalize="none"
                 keyboardType="email-address"
             />
+
+            {carrinhoItems.length > 0 && (
+                <Text style={styles.totalText}>
+                    Total do Carrinho: R$ {totalCarrinho.toFixed(2)}
+                </Text>
+            )}
 
             {isLoading ? (
                 <Text style={styles.loading}>Carregando...</Text>
@@ -220,7 +229,15 @@ const styles = StyleSheet.create({
         marginTop: 12,
         fontSize: 16,
         borderWidth: 1,
-        borderColor: Colors.cinza_claro
+        borderColor: Colors.cinza_claro,
+        marginBottom: 10,
+    },
+    totalText: {
+        fontSize: 20,
+        fontWeight: "bold",
+        marginLeft: 12,
+        marginBottom: 10,
+        color: Colors.azul_vibrante,
     },
     loading: {
         marginTop: 50,
