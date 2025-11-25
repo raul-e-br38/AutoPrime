@@ -6,10 +6,10 @@ import {
     FlatList,
     Alert,
     StyleSheet,
-    Image
+    Image,
+    TextInput
 } from "react-native";
 import Colors from "../design/colors";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import carrinhoService from "../services/carrinhoService";
 import vendaService from "../services/vendaService";
@@ -27,12 +27,10 @@ export default function CarrinhoScreen({ navigation }) {
         carregarEmail();
     }, []);
 
+    // sempre que o email mudar, recarrega o carrinho
     useEffect(() => {
-        const unsubscribe = navigation.addListener("focus", () => {
-            if (email) carregarCarrinho(email);
-        });
-        return unsubscribe;
-    }, [navigation, email]);
+        if (email) carregarCarrinho(email);
+    }, [email]);
 
     const carregarEmail = async () => {
         try {
@@ -40,7 +38,6 @@ export default function CarrinhoScreen({ navigation }) {
             if (storedEmail) {
                 const clean = storedEmail.trim();
                 setEmail(clean);
-                carregarCarrinho(clean);
             }
         } catch (error) {
             console.log("Erro ao carregar e-mail:", error);
@@ -51,16 +48,9 @@ export default function CarrinhoScreen({ navigation }) {
         try {
             setIsLoading(true);
             const data = await carrinhoService.listarCarrinho(emailCliente);
-            // Garante que o estado seja atualizado com os novos dados
             setCarrinhoItems(data.carrinho || []);
         } catch (error) {
-            // Log do erro de carregamento (pode ser problema de API_URL)
             console.log("ERRO AO CARREGAR CARRINHO:", error);
-            Toast.show({
-                type: "error",
-                text1: "Erro de Conexão",
-                text2: "Não foi possível carregar o carrinho. Verifique sua conexão/API URL."
-            });
         } finally {
             setIsLoading(false);
         }
@@ -75,11 +65,9 @@ export default function CarrinhoScreen({ navigation }) {
                 onPress: async () => {
                     try {
                         await carrinhoService.removerItem(id_item);
-                        // Recarrega o carrinho após a remoção
                         carregarCarrinho(email);
                         Toast.show({ type: "success", text1: "Item removido!" });
                     } catch (error) {
-                        // Log do erro de remoção
                         console.log("ERRO AO REMOVER ITEM:", error);
                         Toast.show({
                             type: "error",
@@ -92,7 +80,6 @@ export default function CarrinhoScreen({ navigation }) {
         ]);
     };
 
-    // 💡 Alteração: Adicionado log detalhado do erro.
     const atualizarQuantidade = async (id_item, novaQtd) => {
         if (novaQtd <= 0) {
             removerItem(id_item);
@@ -101,16 +88,13 @@ export default function CarrinhoScreen({ navigation }) {
 
         try {
             await carrinhoService.atualizarQuantidade(id_item, novaQtd);
-            // Chama a função que busca os dados ATUALIZADOS no servidor
             carregarCarrinho(email);
         } catch (e) {
-            // 🚨 LOG CRÍTICO para ver o erro 404/500 ou Network request failed
             console.log("ERRO AO ATUALIZAR QUANTIDADE:", e);
-            // Mostra uma mensagem de erro útil
             Toast.show({
                 type: "error",
                 text1: `Erro: ${e.message}`,
-                text2: "Falha ao atualizar quantidade. Verifique o console."
+                text2: "Falha ao atualizar quantidade."
             });
         }
     };
@@ -138,11 +122,11 @@ export default function CarrinhoScreen({ navigation }) {
     const renderItem = ({ item }) => (
         <View style={styles.itemContainer}>
             <Image
-                // ✅ CORREÇÃO: Usando o mesmo padrão da Home/ProdutoScreen: /static/imagens/ + nome_do_arquivo
-                // Isso requer que a rota Flask 'listar_carrinho' retorne APENAS o nome do arquivo (ex: "104.png").
                 source={{ uri: `${API_URL}/static/imagens/${item.imagem_produto}` }}
                 style={styles.image}
-                onError={(e) => console.log('Erro ao carregar imagem:', e.nativeEvent.error)}
+                onError={(e) =>
+                    console.log("Erro ao carregar imagem:", e.nativeEvent.error)
+                }
             />
 
             <View style={{ flex: 1, marginLeft: 10 }}>
@@ -175,7 +159,10 @@ export default function CarrinhoScreen({ navigation }) {
             </View>
 
             <TouchableOpacity onPress={() => removerItem(item.id_item)}>
-                <Image source={require("../assets/trash.png")} style={{ width: 24, height: 24, tintColor: Colors.red }}/>
+                <Image
+                    source={require("../assets/trash.png")}
+                    style={{ width: 24, height: 24, tintColor: Colors.red }}
+                />
             </TouchableOpacity>
         </View>
     );
@@ -183,6 +170,16 @@ export default function CarrinhoScreen({ navigation }) {
     return (
         <View style={{ flex: 1, backgroundColor: Colors.background }}>
             <Header />
+
+            {/* INPUT DO EMAIL DO CLIENTE */}
+            <TextInput
+                style={styles.inputEmail}
+                placeholder="E-mail do cliente"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+            />
 
             {isLoading ? (
                 <Text style={styles.loading}>Carregando...</Text>
@@ -215,6 +212,16 @@ export default function CarrinhoScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    inputEmail: {
+        backgroundColor: Colors.white,
+        padding: 12,
+        borderRadius: 8,
+        marginHorizontal: 12,
+        marginTop: 12,
+        fontSize: 16,
+        borderWidth: 1,
+        borderColor: Colors.cinza_claro
+    },
     loading: {
         marginTop: 50,
         fontSize: 18,
@@ -242,8 +249,7 @@ const styles = StyleSheet.create({
         width: 70,
         height: 70,
         borderRadius: 8,
-        // Garante que a imagem seja renderizada, mesmo que o source falhe
-        backgroundColor: Colors.cinza_claro,
+        backgroundColor: Colors.cinza_claro
     },
     itemName: {
         fontSize: 16,
