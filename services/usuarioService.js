@@ -1,20 +1,35 @@
 import API_URL from "./apiConfig";
 
+// -----------------------------------------------------
+// BUSCAR ID DO USUÁRIO PELO EMAIL (necessário p/ carrinho)
+// -----------------------------------------------------
+async function buscarID(email) {
+    const response = await fetch(`${API_URL}/buscar_id/${email}`);
+
+    if (!response.ok) {
+        throw new Error("Erro ao buscar ID do cliente");
+    }
+
+    const data = await response.json();
+    return data; // deve retornar { id_cliente: X }
+}
+
+// -----------------------------------------------------
+// BUSCAR USUÁRIO POR ID (caso precise em outra tela)
+// -----------------------------------------------------
 export async function getUsuario(id) {
     try {
         const response = await fetch(`${API_URL}/cadastro`);
+
         if (!response.ok) {
-            console.error("Erro ao buscar usuários:", response.status);
             throw new Error("Erro ao buscar usuários");
         }
 
         const data = await response.json();
-        // Ajuste de chave: a API retorna { cadastro: [...] }
         const lista = data.cadastro || [];
         const user = lista.find(u => String(u.id_cadastro) === String(id));
 
         if (!user) {
-            console.error("Usuário não encontrado na lista");
             throw new Error("Usuário não encontrado");
         }
 
@@ -24,9 +39,13 @@ export async function getUsuario(id) {
     }
 }
 
+// -----------------------------------------------------
+// EDITAR USUÁRIO
+// -----------------------------------------------------
 export async function editarUsuario(id, dados) {
     try {
-        const body = { id_cadastro: id, ...dados }; // a API espera esse formato
+        const body = { id_cadastro: id, ...dados };
+
         const response = await fetch(`${API_URL}/edit_cadastro`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -35,13 +54,16 @@ export async function editarUsuario(id, dados) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error("Erro ao editar usuário:", response.status, errorText);
             throw new Error(errorText || "Erro ao editar usuário");
         }
 
         return await response.json();
     } catch (error) {
-        console.error("editarUsuario:", error);
         throw error;
     }
 }
+
+// -----------------------------------------------------
+// EXPORT DEFAULT (somente o necessário)
+// -----------------------------------------------------
+export default { buscarID };

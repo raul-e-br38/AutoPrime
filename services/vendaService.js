@@ -1,20 +1,24 @@
-// services/vendaService.js
 import API_URL from "./apiConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const vendaService = {
-    async finalizarCompra(email_cliente) {
-        const res = await fetch(`${API_URL}/carrinho/finalizar`, {
+    async registrarVenda({ id_cliente, id_vendedor, id_produto, quantidade, valor_unitario }) {
+        const token = await AsyncStorage.getItem("token");
+        const res = await fetch(`${API_URL}/venda`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email_cliente })
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ id_cliente, id_vendedor, id_produto, quantidade, valor_unitario })
         });
-
         if (!res.ok) {
-            const err = await res.json().catch(() => null);
-            throw new Error(err?.erro || "Erro ao finalizar compra");
-        }
+            const erro = await res.text();
+            console.log(erro);
 
-        return await res.json();
+            throw new Error(`Erro ao registrar venda: ${erro}`);
+        }
+        return res.json();
     }
 };
 

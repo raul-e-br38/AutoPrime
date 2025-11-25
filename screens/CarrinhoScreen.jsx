@@ -19,44 +19,53 @@ import Header from "../components/Header";
 import API_URL from "../services/apiConfig";
 
 export default function CarrinhoScreen({ navigation }) {
-    const [email, setEmail] = useState("");
+
+    const [emailLogado, setEmailLogado] = useState("");
+    const [emailCliente, setEmailCliente] = useState("");
+
     const [carrinhoItems, setCarrinhoItems] = useState([]);
     const [totalCarrinho, setTotalCarrinho] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        async function carregarEmail() {
+            try {
+                const storedEmail = await AsyncStorage.getItem("email");
+                if (!storedEmail) return;
+                setEmailLogado(storedEmail.trim());
+            } catch (e) {
+                console.log("Erro ao carregar email:", e);
+            }
+        }
         carregarEmail();
     }, []);
 
     useEffect(() => {
-        if (email) carregarCarrinho(email);
-    }, [email]);
+        if (emailLogado) carregarCarrinho(emailLogado);
+    }, [emailLogado]);
 
-    const carregarEmail = async () => {
-        try {
-            const storedEmail = await AsyncStorage.getItem("email");
-            if (storedEmail) {
-                const clean = storedEmail.trim();
-                setEmail(clean);
-            }
-        } catch (error) {
-            console.log("Erro ao carregar e-mail:", error);
-        }
-    };
-
-    const carregarCarrinho = async (emailCliente) => {
+    const carregarCarrinho = async (emailBase) => {
         try {
             setIsLoading(true);
-            const data = await carrinhoService.listarCarrinho(emailCliente);
-            const itens = data.carrinho || [];
+            const data = await carrinhoService.buscarCarrinho(emailBase);
+            const itens = Array.isArray(data.carrinho) ? data.carrinho : [];
 
-            setCarrinhoItems(itens);
+            const itensTratados = itens.map((item, i) => ({
+                id_item: item.id_item ?? item.ID_ITEM ?? i + 1,
+                id_produto: item.id_produto ?? item.ID_PRODUTO,
+                nome_produto: item.nome_produto ?? item.NOME_PRODUTO,
+                quantidade: Number(item.quantidade) || 1,
+                valor_unitario: Number(item.valor_unitario) || 0,
+                valor_total: Number(item.valor_total) || 0,
+                imagem_produto: item.imagem_produto || item.IMAGEM
+            }));
 
-            const total = itens.reduce((sum, item) => sum + item.valor_total, 0);
+            setCarrinhoItems(itensTratados);
+            const total = itensTratados.reduce((s, item) => s + item.valor_total, 0);
             setTotalCarrinho(total);
 
-        } catch (error) {
-            console.log("ERRO AO CARREGAR CARRINHO:", error);
+        } catch (e) {
+            console.log("Erro ao carregar carrinho:", e);
         } finally {
             setIsLoading(false);
         }
@@ -71,15 +80,10 @@ export default function CarrinhoScreen({ navigation }) {
                 onPress: async () => {
                     try {
                         await carrinhoService.removerItem(id_item);
-                        carregarCarrinho(email);
+                        carregarCarrinho(emailLogado);
                         Toast.show({ type: "success", text1: "Item removido!" });
-                    } catch (error) {
-                        console.log("ERRO AO REMOVER ITEM:", error);
-                        Toast.show({
-                            type: "error",
-                            text1: `Erro: ${error.message}`,
-                            text2: "Falha ao remover item."
-                        });
+                    } catch (e) {
+                        console.log("ERRO REMOVER:", e);
                     }
                 }
             }
@@ -91,37 +95,81 @@ export default function CarrinhoScreen({ navigation }) {
             removerItem(id_item);
             return;
         }
-
         try {
             await carrinhoService.atualizarQuantidade(id_item, novaQtd);
-            carregarCarrinho(email);
+            carregarCarrinho(emailLogado);
         } catch (e) {
-            console.log("ERRO AO ATUALIZAR QUANTIDADE:", e);
-            Toast.show({
-                type: "error",
-                text1: `Erro: ${e.message}`,
-                text2: "Falha ao atualizar quantidade."
-            });
+            console.log("ERRO AO ATUALIZAR QTD:", e);
         }
     };
 
     const comprarTudo = async () => {
+        if (!emailCliente.trim()) {
+            Toast.show({ type: "error", text1: "Digite o e-mail do cliente" });
+            return;
+        }
+
         try {
-            const res = await vendaService.finalizarCompra(email);
+            const token = await AsyncStorage.getItem("token");
+            if (!token) {
+                Toast.show({ type: "error", text1: "Vendedor não logado" });
+                return;
+            }
+
+            const resCliente = await fetch(`${API_URL}/cadastro/nome/${emailCliente}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            if (!resCliente.ok) {
+                Toast.show({ type: "error", text1: "Cliente não encontrado" });
+                return;
+            }
+
+            const clienteData = await resCliente.json();
+            if (!clienteData.cadastro || clienteData.cadastro.length === 0) {
+                Toast.show({ type: "error", text1: "Cliente não encontrado" });
+                return;
+            }
+
+            const cliente = clienteData.cadastro[0];
+            const id_cliente = cliente.ID_CADASTRO;
+
+            const id_vendedor = Number(await AsyncStorage.getItem("usuario_id"));
+            if (!id_vendedor) {
+                Toast.show({ type: "error", text1: "Vendedor não logado" });
+                return;
+            }
+
+            for (const item of carrinhoItems) {
+                console.log("DEBUG venda:", {
+                    id_cliente,
+                    id_vendedor,
+                    id_produto: item.id_produto,
+                    quantidade: item.quantidade,
+                    valor_unitario: item.valor_unitario
+                });
+                await vendaService.registrarVenda({
+                    id_cliente,
+                    id_vendedor,
+                    id_produto: item.id_produto,
+                    quantidade: item.quantidade,
+                    valor_unitario: item.valor_unitario
+                });
+            }
+
+            await carrinhoService.limparCarrinho(emailLogado);
 
             Toast.show({
                 type: "success",
                 text1: "Compra finalizada!",
-                text2: `Itens comprados: ${res.total_itens_comprados}`
+                text2: `${carrinhoItems.length} itens vendidos`
             });
 
-            carregarCarrinho(email);
-        } catch (error) {
-            console.log("ERRO AO FINALIZAR COMPRA:", error);
-            Toast.show({
-                type: "error",
-                text1: error.message || "Erro ao finalizar compra"
-            });
+            carregarCarrinho(emailLogado);
+
+        } catch (e) {
+            console.log("ERRO FINALIZAR:", e);
+            Toast.show({ type: "error", text1: e.message || "Erro na compra" });
         }
     };
 
@@ -130,38 +178,26 @@ export default function CarrinhoScreen({ navigation }) {
             <Image
                 source={{ uri: `${API_URL}/static/imagens/${item.imagem_produto}` }}
                 style={styles.image}
-                onError={(e) =>
-                    console.log("Erro ao carregar imagem:", e.nativeEvent.error)
-                }
             />
-
             <View style={{ flex: 1, marginLeft: 10 }}>
                 <Text style={styles.itemName}>{item.nome_produto}</Text>
                 <Text style={styles.itemPrice}>R$ {item.valor_total.toFixed(2)}</Text>
-
                 <View style={styles.qtdContainer}>
                     <TouchableOpacity
                         style={styles.qtdButton}
-                        onPress={() =>
-                            atualizarQuantidade(item.id_item, item.quantidade - 1)
-                        }
+                        onPress={() => atualizarQuantidade(item.id_item, item.quantidade - 1)}
                     >
                         <Text style={styles.qtdText}>-</Text>
                     </TouchableOpacity>
-
                     <Text style={styles.qtdNumber}>{item.quantidade}</Text>
-
                     <TouchableOpacity
                         style={styles.qtdButton}
-                        onPress={() =>
-                            atualizarQuantidade(item.id_item, item.quantidade + 1)
-                        }
+                        onPress={() => atualizarQuantidade(item.id_item, item.quantidade + 1)}
                     >
                         <Text style={styles.qtdText}>+</Text>
                     </TouchableOpacity>
                 </View>
             </View>
-
             <TouchableOpacity onPress={() => removerItem(item.id_item)}>
                 <Image
                     source={require("../assets/trash.png")}
@@ -174,22 +210,19 @@ export default function CarrinhoScreen({ navigation }) {
     return (
         <View style={{ flex: 1, backgroundColor: Colors.background }}>
             <Header />
-
             <TextInput
                 style={styles.inputEmail}
-                placeholder="E-mail do cliente"
-                value={email}
-                onChangeText={setEmail}
+                placeholder="E-mail do cliente para compra"
+                value={emailCliente}
+                onChangeText={setEmailCliente}
                 autoCapitalize="none"
                 keyboardType="email-address"
             />
-
             {carrinhoItems.length > 0 && (
                 <Text style={styles.totalText}>
                     Total do Carrinho: R$ {totalCarrinho.toFixed(2)}
                 </Text>
             )}
-
             {isLoading ? (
                 <Text style={styles.loading}>Carregando...</Text>
             ) : carrinhoItems.length === 0 ? (
@@ -199,22 +232,17 @@ export default function CarrinhoScreen({ navigation }) {
             ) : (
                 <FlatList
                     data={carrinhoItems}
-                    keyExtractor={(item) => item.id_item.toString()}
+                    keyExtractor={(item) => String(item.id_item)}
                     renderItem={renderItem}
                     contentContainerStyle={{ paddingBottom: 50 }}
                 />
             )}
-
             {carrinhoItems.length > 0 && (
                 <TouchableOpacity style={styles.buyButton} onPress={comprarTudo}>
                     <Text style={styles.buyButtonText}>Finalizar Compra</Text>
                 </TouchableOpacity>
             )}
-
-            <View style={{ marginTop: carrinhoItems.length === 0 ? "auto" : 0 }}>
-                <Footer />
-            </View>
-
+            <Footer />
             <Toast />
         </View>
     );
@@ -239,16 +267,8 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         color: Colors.azul_vibrante,
     },
-    loading: {
-        marginTop: 50,
-        fontSize: 18,
-        textAlign: "center"
-    },
-    emptyCart: {
-        fontSize: 18,
-        textAlign: "center",
-        color: Colors.cinza_medio
-    },
+    loading: { marginTop: 50, fontSize: 18, textAlign: "center" },
+    emptyCart: { fontSize: 18, textAlign: "center", color: Colors.cinza_medio },
     itemContainer: {
         flexDirection: "row",
         alignItems: "center",
@@ -262,53 +282,13 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 2
     },
-    image: {
-        width: 70,
-        height: 70,
-        borderRadius: 8,
-        backgroundColor: Colors.cinza_claro
-    },
-    itemName: {
-        fontSize: 16,
-        fontWeight: "bold"
-    },
-    itemPrice: {
-        fontSize: 14,
-        color: "#1E88E5"
-    },
-    qtdContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 6
-    },
-    qtdButton: {
-        width: 28,
-        height: 28,
-        borderRadius: 6,
-        backgroundColor: Colors.cinza_claro,
-        alignItems: "center",
-        justifyContent: "center"
-    },
-    qtdText: {
-        fontSize: 18,
-        fontWeight: "bold"
-    },
-    qtdNumber: {
-        marginHorizontal: 10,
-        fontSize: 16,
-        fontWeight: "bold"
-    },
-    buyButton: {
-        backgroundColor: Colors.azul_vibrante,
-        padding: 16,
-        borderRadius: 10,
-        marginVertical: 20,
-        marginHorizontal: 12
-    },
-    buyButtonText: {
-        color: Colors.white,
-        fontSize: 18,
-        textAlign: "center",
-        fontWeight: "bold"
-    }
+    image: { width: 70, height: 70, borderRadius: 8, backgroundColor: Colors.cinza_claro },
+    itemName: { fontSize: 16, fontWeight: "bold" },
+    itemPrice: { fontSize: 14, color: "#1E88E5" },
+    qtdContainer: { flexDirection: "row", alignItems: "center", marginTop: 6 },
+    qtdButton: { width: 28, height: 28, borderRadius: 6, backgroundColor: Colors.cinza_claro, alignItems: "center", justifyContent: "center" },
+    qtdText: { fontSize: 18, fontWeight: "bold" },
+    qtdNumber: { marginHorizontal: 10, fontSize: 16, fontWeight: "bold" },
+    buyButton: { backgroundColor: Colors.azul_vibrante, padding: 16, borderRadius: 10, marginVertical: 20, marginHorizontal: 12 },
+    buyButtonText: { color: Colors.white, fontSize: 18, textAlign: "center", fontWeight: "bold" }
 });

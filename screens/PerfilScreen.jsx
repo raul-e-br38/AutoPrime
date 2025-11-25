@@ -24,41 +24,29 @@ const PerfilScreen = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [cashback, setCashback] = useState(0.00);
 
-
     const carregarUsuario = async () => {
-        setRefreshing(true); // Ativa o refreshing antes de começar
-        let userId = null;
+        setRefreshing(true);
+
         try {
             const idString = await AsyncStorage.getItem("usuario_id");
-            if (!idString) return;
-
-            // ✅ CORREÇÃO CRÍTICA: Converte o ID de string para número (inteiro)
-            const id = parseInt(idString, 10);
-
-            if (isNaN(id)) {
-                console.error("ID do Usuário não é um número válido:", idString);
+            if (!idString) {
+                Toast.show({ type: "error", text1: "Usuário não encontrado" });
                 return;
             }
 
-            userId = id;
+            const id = parseInt(idString, 10);
+            if (isNaN(id)) return;
 
-            console.log("LOG CRÍTICO 1: ID do Usuário Carregado (para cashback):", userId);
+            const user = await getUsuario(idString);
 
-            // Carrega dados de perfil
-            const user = await getUsuario(idString); // Mantém string para serviços que usam string ID
             if (user.nome) setPlaceholderNome(user.nome);
             if (user.email) setPlaceholderEmail(user.email);
 
-            // 💰 Carrega o Cashback
-            const totalCashback = await cashbackService.getCashbackTotal(userId);
-
-            console.log("LOG CRÍTICO 2: Cashback Recebido da API:", totalCashback);
-
+            const totalCashback = await cashbackService.getCashbackTotal(id);
             setCashback(totalCashback);
 
         } catch (error) {
-            console.error("Erro ao carregar dados do usuário ou cashback:", error);
-            console.log("Chamando cashback para ID:", userId);
+            console.error("Erro ao carregar usuário:", error);
             Toast.show({ type: "error", text1: "Erro ao carregar dados" });
         } finally {
             setRefreshing(false);
@@ -66,13 +54,10 @@ const PerfilScreen = () => {
     };
 
     useEffect(() => {
-        if (isFocused) {
-            carregarUsuario();
-        }
+        if (isFocused) carregarUsuario();
     }, [isFocused]);
 
     const onRefresh = useCallback(() => {
-        setRefreshing(true);
         carregarUsuario();
     }, []);
 
@@ -82,12 +67,15 @@ const PerfilScreen = () => {
                 Toast.show({ type: "error", text1: "Senhas não coincidem" });
                 return;
             }
-            const senhaRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+
+            const senhaRegex =
+                /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+
             if (!senhaRegex.test(senha)) {
                 Toast.show({
                     type: "error",
                     text1: "Senha fraca",
-                    text2: "Use pelo menos 8 caracteres, 1 maiúscula e 1 caractere especial"
+                    text2: "Use 8 caracteres, 1 letra maiúscula e 1 caractere especial"
                 });
                 return;
             }
@@ -114,25 +102,24 @@ const PerfilScreen = () => {
             if (senha.trim()) dados.senha = senha;
 
             await editarUsuario(id, dados);
+
             Toast.show({ type: "success", text1: "Perfil atualizado com sucesso" });
 
             if (nome) await AsyncStorage.setItem("nome", nome);
             if (email) await AsyncStorage.setItem("email", email);
 
-            // Recarrega os dados do usuário e o cashback após editar
             await carregarUsuario();
 
-            // Limpa os campos após salvar
             setNome("");
             setEmail("");
             setSenha("");
             setSenhaConfirmar("");
+
         } catch (error) {
             console.error("Erro ao editar perfil:", error);
             Toast.show({ type: "error", text1: "Erro ao atualizar perfil" });
         }
     }
-
 
     async function handleLogout() {
         await AsyncStorage.clear();
@@ -143,23 +130,17 @@ const PerfilScreen = () => {
     }
 
     return (
-        <ScrollView
-            refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-        >
+        <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
             <Header />
 
             <View style={styles.container}>
                 <Text style={styles.titulo}>Seu Perfil</Text>
 
-                {/* 💰 Exibição do Cashback */}
                 <View style={styles.cashbackContainer}>
                     <Text style={styles.cashbackLabel}>Cashback Acumulado:</Text>
                     <Text style={styles.cashbackValue}>R$ {cashback.toFixed(2)}</Text>
                 </View>
 
-                {/* Botão para ir ao carrinho */}
                 <TouchableOpacity
                     style={styles.carrinho}
                     onPress={() => navigation.navigate("Carrinho")}
@@ -172,12 +153,12 @@ const PerfilScreen = () => {
                 <Input placeholder={placeholderEmail} value={email} onChangeText={setEmail} />
 
                 <Text style={styles.section}>Alterar Senha</Text>
-                <Input placeholder="Nova Senha" value={senha} onChangeText={setSenha} secureTextEntry />
-                <Input placeholder="Confirmar Nova Senha" value={senhaConfirmar} onChangeText={setSenhaConfirmar} secureTextEntry />
+                <Input placeholder="Nova Senha" secureTextEntry value={senha} onChangeText={setSenha} />
+                <Input placeholder="Confirmar Nova Senha" secureTextEntry value={senhaConfirmar} onChangeText={setSenhaConfirmar} />
 
                 <BtnEnviar title="Salvar Mudanças" onPress={editar} />
 
-                <TouchableOpacity onPress={handleLogout} style={styles.sair}>
+                <TouchableOpacity style={styles.sair} onPress={handleLogout}>
                     <Text style={styles.sairTxt}>Sair</Text>
                 </TouchableOpacity>
             </View>
@@ -196,7 +177,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         margin: 20,
-        gap: 5 },
+        gap: 5
+    },
     titulo: {
         fontWeight: "bold",
         fontSize: 22,
@@ -206,30 +188,34 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 16,
         marginVertical: 20,
-        alignSelf: "flex-start" },
+        alignSelf: "flex-start"
+    },
     sair: {
         backgroundColor: colors.vermelho,
         paddingVertical: 10,
         borderRadius: 9,
         alignItems: "center",
         width: "50%",
-        marginTop: 10 },
+        marginTop: 10
+    },
     sairTxt: {
         color: colors.branco,
         fontSize: 20,
-        fontWeight: "bold" },
+        fontWeight: "bold"
+    },
     carrinho: {
         backgroundColor: colors.azul,
         paddingVertical: 10,
         borderRadius: 9,
         alignItems: "center",
         width: "50%",
-        marginTop: 10 },
+        marginTop: 10
+    },
     carrinhoTxt: {
         color: colors.branco,
         fontSize: 20,
-        fontWeight: "bold" },
-    // 💰 Novos estilos para o Cashback
+        fontWeight: "bold"
+    },
     cashbackContainer: {
         backgroundColor: colors.verde_claro,
         padding: 15,
