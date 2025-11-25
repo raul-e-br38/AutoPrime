@@ -24,6 +24,7 @@ const PerfilScreen = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [cashback, setCashback] = useState(0.00);
 
+
     const carregarUsuario = async () => {
         setRefreshing(true); // Ativa o refreshing antes de começar
         let userId = null;
@@ -57,6 +58,7 @@ const PerfilScreen = () => {
 
         } catch (error) {
             console.error("Erro ao carregar dados do usuário ou cashback:", error);
+            console.log("Chamando cashback para ID:", userId);
             Toast.show({ type: "error", text1: "Erro ao carregar dados" });
         } finally {
             setRefreshing(false);

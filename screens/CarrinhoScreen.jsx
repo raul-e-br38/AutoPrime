@@ -175,7 +175,7 @@ export default function CarrinhoScreen({ navigation }) {
             </View>
 
             <TouchableOpacity onPress={() => removerItem(item.id_item)}>
-                <Ionicons name="trash-bin" size={26} color={Colors.red} />
+                <Image source={require("../assets/trash.png")} style={{ width: 24, height: 24, tintColor: Colors.red }}/>
             </TouchableOpacity>
         </View>
     );

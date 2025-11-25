@@ -26,7 +26,7 @@ export default function CadastroScreen({ navigation }) {
     // Estado dos campos de entrada do formulário
     const [nome, setNome] = useState("");  // Nome do usuário
     const [email, setEmail] = useState("");  // Email do usuário
-    const [cargo, setCargo] = useState("");  // Cargo do usuário
+    const [cargo, setCargo] = useState("Vendedor");  // Cargo do usuário
     const [senha, setSenha] = useState("");  // Senha do usuário
     const [erroSenha, setErroSenha] = useState("");  // Erro de validação da senha
 
@@ -124,20 +124,6 @@ export default function CadastroScreen({ navigation }) {
                         />
                     </View>
 
-                    {/* Dropdown para selecionar o cargo */}
-                    <View style={styles.pickerContainer}>
-                        <RNPickerSelect
-                            onValueChange={(value) => setCargo(value)}  // Atualiza o estado do cargo
-                            items={[
-                                { label: "Vendedor", value: "Vendedor" },
-                                { label: "Cliente", value: "Cliente" },
-                            ]}
-                            placeholder={{ label: "Selecione seu cargo...", value: null }}  // Texto de placeholder
-                            style={pickerSelectStyles}
-                            value={cargo}  // Valor selecionado
-                            useNativeAndroidPickerStyle={false}  // Estilo nativo do Android desativado
-                        />
-                    </View>
 
                     {/* Campo de senha */}
                     <View style={styles.inputContainer}>
