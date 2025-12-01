@@ -78,11 +78,11 @@ const carrinhoService = {
         }
     },
 
-    async limparCarrinho(email_cliente) {
+    async limparCarrinho() {
         try {
             const token = await AsyncStorage.getItem("token");
-            const res = await fetch(`${API_URL}/carrinho/limpar/${email_cliente}`, {
-                method: "DELETE",
+            const res = await fetch(`${API_URL}/carrinho/limpar`, {
+                method: "POST", // trocar DELETE para POST
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (!res.ok) {
@@ -94,6 +94,8 @@ const carrinhoService = {
             throw erro;
         }
     }
+
+
 };
 
 export default carrinhoService;

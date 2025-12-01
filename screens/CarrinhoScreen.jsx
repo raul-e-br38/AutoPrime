@@ -9,6 +9,7 @@ import {
     Image,
     TextInput
 } from "react-native";
+
 import Colors from "../design/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import carrinhoService from "../services/carrinhoService";
@@ -19,13 +20,12 @@ import Header from "../components/Header";
 import API_URL from "../services/apiConfig";
 
 export default function CarrinhoScreen({ navigation }) {
-
     const [emailLogado, setEmailLogado] = useState("");
     const [emailCliente, setEmailCliente] = useState("");
-
     const [carrinhoItems, setCarrinhoItems] = useState([]);
     const [totalCarrinho, setTotalCarrinho] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [isBuying, setIsBuying] = useState(false);
 
     useEffect(() => {
         async function carregarEmail() {
@@ -33,8 +33,9 @@ export default function CarrinhoScreen({ navigation }) {
                 const storedEmail = await AsyncStorage.getItem("email");
                 if (!storedEmail) return;
                 setEmailLogado(storedEmail.trim());
+                console.log("Email do usuário logado:", storedEmail.trim());
             } catch (e) {
-                console.log("Erro ao carregar email:", e);
+                console.log("Erro ao carregar email do usuário logado:", e);
             }
         }
         carregarEmail();
@@ -52,7 +53,7 @@ export default function CarrinhoScreen({ navigation }) {
 
             const itensTratados = itens.map((item, i) => ({
                 id_item: item.id_item ?? item.ID_ITEM ?? i + 1,
-                id_produto: item.id_produto ?? item.ID_PRODUTO,
+                id_produto: item.id_produto ?? item.ID_PRODUTO ?? item.produto_id,
                 nome_produto: item.nome_produto ?? item.NOME_PRODUTO,
                 quantidade: Number(item.quantidade) || 1,
                 valor_unitario: Number(item.valor_unitario) || 0,
@@ -64,8 +65,10 @@ export default function CarrinhoScreen({ navigation }) {
             const total = itensTratados.reduce((s, item) => s + item.valor_total, 0);
             setTotalCarrinho(total);
 
+            console.log(`Carrinho carregado para ${emailBase}:`, itensTratados);
         } catch (e) {
             console.log("Erro ao carregar carrinho:", e);
+            Toast.show({ type: "error", text1: "Erro ao carregar carrinho" });
         } finally {
             setIsLoading(false);
         }
@@ -82,8 +85,10 @@ export default function CarrinhoScreen({ navigation }) {
                         await carrinhoService.removerItem(id_item);
                         carregarCarrinho(emailLogado);
                         Toast.show({ type: "success", text1: "Item removido!" });
+                        console.log("Item removido:", id_item);
                     } catch (e) {
-                        console.log("ERRO REMOVER:", e);
+                        console.log("ERRO REMOVER ITEM:", e);
+                        Toast.show({ type: "error", text1: "Erro ao remover item" });
                     }
                 }
             }
@@ -98,8 +103,10 @@ export default function CarrinhoScreen({ navigation }) {
         try {
             await carrinhoService.atualizarQuantidade(id_item, novaQtd);
             carregarCarrinho(emailLogado);
+            console.log(`Quantidade atualizada para item ${id_item}:`, novaQtd);
         } catch (e) {
-            console.log("ERRO AO ATUALIZAR QTD:", e);
+            console.log("ERRO AO ATUALIZAR QUANTIDADE:", e);
+            Toast.show({ type: "error", text1: "Erro ao atualizar quantidade" });
         }
     };
 
@@ -109,67 +116,40 @@ export default function CarrinhoScreen({ navigation }) {
             return;
         }
 
+        setIsBuying(true);
         try {
-            const token = await AsyncStorage.getItem("token");
-            if (!token) {
-                Toast.show({ type: "error", text1: "Vendedor não logado" });
+            console.log("Iniciando compra para o cliente:", emailCliente);
+
+            // Carregar carrinho do cliente que você quer vender
+            const clienteCarrinho = await carrinhoService.buscarCarrinho(emailCliente);
+            if (!clienteCarrinho || !clienteCarrinho.carrinho.length) {
+                Toast.show({ type: "error", text1: "Carrinho do cliente vazio" });
+                console.log("Carrinho vazio para:", emailCliente);
                 return;
             }
 
-            const resCliente = await fetch(`${API_URL}/cadastro/nome/${emailCliente}`, {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-
-            if (!resCliente.ok) {
-                Toast.show({ type: "error", text1: "Cliente não encontrado" });
-                return;
-            }
-
-            const clienteData = await resCliente.json();
-            if (!clienteData.cadastro || clienteData.cadastro.length === 0) {
-                Toast.show({ type: "error", text1: "Cliente não encontrado" });
-                return;
-            }
-
-            const cliente = clienteData.cadastro[0];
-            const id_cliente = cliente.ID_CADASTRO;
-
-            const id_vendedor = Number(await AsyncStorage.getItem("usuario_id"));
-            if (!id_vendedor) {
-                Toast.show({ type: "error", text1: "Vendedor não logado" });
-                return;
-            }
-
-            for (const item of carrinhoItems) {
-                console.log("DEBUG venda:", {
-                    id_cliente,
-                    id_vendedor,
-                    id_produto: item.id_produto,
-                    quantidade: item.quantidade,
-                    valor_unitario: item.valor_unitario
-                });
-                await vendaService.registrarVenda({
-                    id_cliente,
-                    id_vendedor,
-                    id_produto: item.id_produto,
-                    quantidade: item.quantidade,
-                    valor_unitario: item.valor_unitario
-                });
-            }
-
-            await carrinhoService.limparCarrinho(emailLogado);
+            // Finaliza a venda via API
+            const data = await vendaService.finalizarVenda(emailCliente);
+            console.log("COMPRA FINALIZADA COM SUCESSO:", data);
 
             Toast.show({
                 type: "success",
                 text1: "Compra finalizada!",
-                text2: `${carrinhoItems.length} itens vendidos`
+                text2: `${data.total_itens_comprados || 0} itens vendidos`
             });
 
+            // Atualiza carrinho do usuário logado
             carregarCarrinho(emailLogado);
 
         } catch (e) {
-            console.log("ERRO FINALIZAR:", e);
-            Toast.show({ type: "error", text1: e.message || "Erro na compra" });
+            console.log("ERRO AO FINALIZAR COMPRA:", e);
+            let mensagem = e.message;
+            try {
+                mensagem = JSON.parse(e.message).erro || e.message;
+            } catch (_) {}
+            Toast.show({ type: "error", text1: mensagem || "Erro na compra" });
+        } finally {
+            setIsBuying(false);
         }
     };
 
@@ -209,7 +189,7 @@ export default function CarrinhoScreen({ navigation }) {
 
     return (
         <View style={{ flex: 1, backgroundColor: Colors.background }}>
-            <Header />
+            <Header/>
             <TextInput
                 style={styles.inputEmail}
                 placeholder="E-mail do cliente para compra"
@@ -238,12 +218,13 @@ export default function CarrinhoScreen({ navigation }) {
                 />
             )}
             {carrinhoItems.length > 0 && (
-                <TouchableOpacity style={styles.buyButton} onPress={comprarTudo}>
-                    <Text style={styles.buyButtonText}>Finalizar Compra</Text>
+                <TouchableOpacity style={styles.buyButton} onPress={comprarTudo} disabled={isBuying}>
+                    <Text style={styles.buyButtonText}>
+                        {isBuying ? "Processando..." : "Finalizar Compra"}
+                    </Text>
                 </TouchableOpacity>
             )}
-            <Footer />
-            <Toast />
+            <Footer/>
         </View>
     );
 }
