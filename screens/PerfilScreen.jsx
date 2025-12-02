@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     },
     carrinhoTxt: {
         color: colors.branco,
-        fontSize: 20,
+        fontSize: 15,
         fontWeight: "bold"
     },
     cashbackContainer: {

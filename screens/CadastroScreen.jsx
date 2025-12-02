@@ -26,7 +26,7 @@ export default function CadastroScreen({ navigation }) {
     // Estado dos campos de entrada do formulário
     const [nome, setNome] = useState("");  // Nome do usuário
     const [email, setEmail] = useState("");  // Email do usuário
-    const [cargo, setCargo] = useState("Vendedor");  // Cargo do usuário
+    const [cargo, setCargo] = useState("Cliente");  // Cargo do usuário
     const [senha, setSenha] = useState("");  // Senha do usuário
     const [erroSenha, setErroSenha] = useState("");  // Erro de validação da senha
 

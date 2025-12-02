@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
     View,
     Text,
@@ -21,11 +21,32 @@ import API_URL from "../services/apiConfig";
 
 export default function CarrinhoScreen({ navigation }) {
     const [emailLogado, setEmailLogado] = useState("");
-    const [emailCliente, setEmailCliente] = useState("");
+    const [emailCliente, setEmailCliente] = useState(""); // input continua vazio
     const [carrinhoItems, setCarrinhoItems] = useState([]);
     const [totalCarrinho, setTotalCarrinho] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [isBuying, setIsBuying] = useState(false);
+
+    const toastQueue = useRef([]);
+
+    const showToast = (toastObj) => {
+        toastQueue.current.push(toastObj);
+        if (toastQueue.current.length === 1) displayNextToast();
+    };
+
+    const displayNextToast = () => {
+        if (!toastQueue.current.length) return;
+        const current = toastQueue.current[0];
+        setTimeout(() => {
+            Toast.show({
+                ...current,
+                onHide: () => {
+                    toastQueue.current.shift();
+                    displayNextToast();
+                }
+            });
+        }, 100);
+    };
 
     useEffect(() => {
         async function carregarEmail() {
@@ -33,9 +54,9 @@ export default function CarrinhoScreen({ navigation }) {
                 const storedEmail = await AsyncStorage.getItem("email");
                 if (!storedEmail) return;
                 setEmailLogado(storedEmail.trim());
-                console.log("Email do usuário logado:", storedEmail.trim());
             } catch (e) {
-                console.log("Erro ao carregar email do usuário logado:", e);
+                console.log("Erro ao carregar email:", e);
+                showToast({ type: "error", text1: "Erro ao carregar usuário", position: "top" });
             }
         }
         carregarEmail();
@@ -64,11 +85,9 @@ export default function CarrinhoScreen({ navigation }) {
             setCarrinhoItems(itensTratados);
             const total = itensTratados.reduce((s, item) => s + item.valor_total, 0);
             setTotalCarrinho(total);
-
-            console.log(`Carrinho carregado para ${emailBase}:`, itensTratados);
         } catch (e) {
             console.log("Erro ao carregar carrinho:", e);
-            Toast.show({ type: "error", text1: "Erro ao carregar carrinho" });
+            showToast({ type: "error", text1: "Erro ao carregar carrinho", position: "top", visibilityTime: 3000 });
         } finally {
             setIsLoading(false);
         }
@@ -84,11 +103,10 @@ export default function CarrinhoScreen({ navigation }) {
                     try {
                         await carrinhoService.removerItem(id_item);
                         carregarCarrinho(emailLogado);
-                        Toast.show({ type: "success", text1: "Item removido!" });
-                        console.log("Item removido:", id_item);
+                        showToast({ type: "success", text1: "Item removido", position: "top", visibilityTime: 2000 });
                     } catch (e) {
-                        console.log("ERRO REMOVER ITEM:", e);
-                        Toast.show({ type: "error", text1: "Erro ao remover item" });
+                        console.log("Erro ao remover item:", e);
+                        showToast({ type: "error", text1: "Erro ao remover item", position: "top", visibilityTime: 3000 });
                     }
                 }
             }
@@ -103,51 +121,33 @@ export default function CarrinhoScreen({ navigation }) {
         try {
             await carrinhoService.atualizarQuantidade(id_item, novaQtd);
             carregarCarrinho(emailLogado);
-            console.log(`Quantidade atualizada para item ${id_item}:`, novaQtd);
         } catch (e) {
-            console.log("ERRO AO ATUALIZAR QUANTIDADE:", e);
-            Toast.show({ type: "error", text1: "Erro ao atualizar quantidade" });
+            console.log("Erro ao atualizar quantidade:", e);
+            showToast({ type: "error", text1: "Erro ao atualizar quantidade", position: "top", visibilityTime: 3000 });
         }
     };
 
     const comprarTudo = async () => {
-        if (!emailCliente.trim()) {
-            Toast.show({ type: "error", text1: "Digite o e-mail do cliente" });
-            return;
-        }
-
         setIsBuying(true);
         try {
-            console.log("Iniciando compra para o cliente:", emailCliente);
+            // sempre finaliza usando o carrinho do usuário logado
+            const data = await vendaService.finalizarVenda(emailLogado);
 
-            // Carregar carrinho do cliente que você quer vender
-            const clienteCarrinho = await carrinhoService.buscarCarrinho(emailCliente);
-            if (!clienteCarrinho || !clienteCarrinho.carrinho.length) {
-                Toast.show({ type: "error", text1: "Carrinho do cliente vazio" });
-                console.log("Carrinho vazio para:", emailCliente);
-                return;
-            }
-
-            // Finaliza a venda via API
-            const data = await vendaService.finalizarVenda(emailCliente);
-            console.log("COMPRA FINALIZADA COM SUCESSO:", data);
-
-            Toast.show({
+            showToast({
                 type: "success",
                 text1: "Compra finalizada!",
-                text2: `${data.total_itens_comprados || 0} itens vendidos`
+                text2: `${data.total_itens_comprados || 0} itens vendidos`,
+                position: "top",
+                visibilityTime: 3000
             });
 
-            // Atualiza carrinho do usuário logado
             carregarCarrinho(emailLogado);
 
         } catch (e) {
-            console.log("ERRO AO FINALIZAR COMPRA:", e);
+            console.log("Erro ao finalizar compra:", e);
             let mensagem = e.message;
-            try {
-                mensagem = JSON.parse(e.message).erro || e.message;
-            } catch (_) {}
-            Toast.show({ type: "error", text1: mensagem || "Erro na compra" });
+            try { mensagem = JSON.parse(e.message).erro || e.message; } catch (_) {}
+            showToast({ type: "error", text1: mensagem || "Erro na compra", position: "top", visibilityTime: 3000 });
         } finally {
             setIsBuying(false);
         }
@@ -163,17 +163,11 @@ export default function CarrinhoScreen({ navigation }) {
                 <Text style={styles.itemName}>{item.nome_produto}</Text>
                 <Text style={styles.itemPrice}>R$ {item.valor_total.toFixed(2)}</Text>
                 <View style={styles.qtdContainer}>
-                    <TouchableOpacity
-                        style={styles.qtdButton}
-                        onPress={() => atualizarQuantidade(item.id_item, item.quantidade - 1)}
-                    >
+                    <TouchableOpacity style={styles.qtdButton} onPress={() => atualizarQuantidade(item.id_item, item.quantidade - 1)}>
                         <Text style={styles.qtdText}>-</Text>
                     </TouchableOpacity>
                     <Text style={styles.qtdNumber}>{item.quantidade}</Text>
-                    <TouchableOpacity
-                        style={styles.qtdButton}
-                        onPress={() => atualizarQuantidade(item.id_item, item.quantidade + 1)}
-                    >
+                    <TouchableOpacity style={styles.qtdButton} onPress={() => atualizarQuantidade(item.id_item, item.quantidade + 1)}>
                         <Text style={styles.qtdText}>+</Text>
                     </TouchableOpacity>
                 </View>
@@ -188,44 +182,43 @@ export default function CarrinhoScreen({ navigation }) {
     );
 
     return (
-        <View style={{ flex: 1, backgroundColor: Colors.background }}>
-            <Header/>
-            <TextInput
-                style={styles.inputEmail}
-                placeholder="E-mail do cliente para compra"
-                value={emailCliente}
-                onChangeText={setEmailCliente}
-                autoCapitalize="none"
-                keyboardType="email-address"
-            />
-            {carrinhoItems.length > 0 && (
-                <Text style={styles.totalText}>
-                    Total do Carrinho: R$ {totalCarrinho.toFixed(2)}
-                </Text>
-            )}
-            {isLoading ? (
-                <Text style={styles.loading}>Carregando...</Text>
-            ) : carrinhoItems.length === 0 ? (
-                <View style={{ flex: 1, justifyContent: "center" }}>
-                    <Text style={styles.emptyCart}>Seu carrinho está vazio.</Text>
-                </View>
-            ) : (
-                <FlatList
-                    data={carrinhoItems}
-                    keyExtractor={(item) => String(item.id_item)}
-                    renderItem={renderItem}
-                    contentContainerStyle={{ paddingBottom: 50 }}
+        <>
+            <View style={{ flex: 1, backgroundColor: Colors.background }}>
+                <Header />
+                <TextInput
+                    style={styles.inputEmail}
+                    placeholder="E-mail do cliente"
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    onChangeText={setEmailCliente} // captura o que digitar
+                    value={emailCliente} // mantém input visível
                 />
-            )}
-            {carrinhoItems.length > 0 && (
-                <TouchableOpacity style={styles.buyButton} onPress={comprarTudo} disabled={isBuying}>
-                    <Text style={styles.buyButtonText}>
-                        {isBuying ? "Processando..." : "Finalizar Compra"}
-                    </Text>
-                </TouchableOpacity>
-            )}
-            <Footer/>
-        </View>
+                {carrinhoItems.length > 0 && (
+                    <Text style={styles.totalText}>Total do Carrinho: R$ {totalCarrinho.toFixed(2)}</Text>
+                )}
+                {isLoading ? (
+                    <Text style={styles.loading}>Carregando...</Text>
+                ) : carrinhoItems.length === 0 ? (
+                    <View style={{ flex: 1, justifyContent: "center" }}>
+                        <Text style={styles.emptyCart}>Seu carrinho está vazio.</Text>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={carrinhoItems}
+                        keyExtractor={(item) => String(item.id_item)}
+                        renderItem={renderItem}
+                        contentContainerStyle={{ paddingBottom: 50 }}
+                    />
+                )}
+                {carrinhoItems.length > 0 && (
+                    <TouchableOpacity style={styles.buyButton} onPress={comprarTudo} disabled={isBuying}>
+                        <Text style={styles.buyButtonText}>{isBuying ? "Processando..." : "Finalizar Compra"}</Text>
+                    </TouchableOpacity>
+                )}
+                <Footer />
+            </View>
+            <Toast />
+        </>
     );
 }
 

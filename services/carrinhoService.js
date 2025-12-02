@@ -1,5 +1,15 @@
 import API_URL from "./apiConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
+
+const showToast = (msg) => {
+    Toast.show({
+        type: "error",
+        text1: msg,
+        position: "top",
+        visibilityTime: 3000
+    });
+};
 
 const carrinhoService = {
 
@@ -11,10 +21,12 @@ const carrinhoService = {
             });
             if (!res.ok) {
                 const erro = await res.text();
-                throw new Error(`Erro ao buscar carrinho: ${erro}`);
+                showToast(`Cliente Não Encontrado: ${erro}`);
+                throw new Error(erro);
             }
             return await res.json();
         } catch (erro) {
+            showToast(erro.message || "Erro ao buscar carrinho");
             throw erro;
         }
     },
@@ -32,10 +44,12 @@ const carrinhoService = {
             });
             if (!res.ok) {
                 const erro = await res.text();
-                throw new Error(`Erro ao adicionar item: ${erro}`);
+                showToast(`Erro ao adicionar item: ${erro}`);
+                throw new Error(erro);
             }
             return await res.json();
         } catch (erro) {
+            showToast(erro.message || "Erro ao adicionar item");
             throw erro;
         }
     },
@@ -53,10 +67,12 @@ const carrinhoService = {
             });
             if (!res.ok) {
                 const erro = await res.text();
-                throw new Error(`Erro ao atualizar quantidade: ${erro}`);
+                showToast(`Erro ao atualizar quantidade: ${erro}`);
+                throw new Error(erro);
             }
             return await res.json();
         } catch (erro) {
+            showToast(erro.message || "Erro ao atualizar quantidade");
             throw erro;
         }
     },
@@ -70,10 +86,12 @@ const carrinhoService = {
             });
             if (!res.ok) {
                 const erro = await res.text();
-                throw new Error(`Erro ao remover item: ${erro}`);
+                showToast(`Erro ao remover item: ${erro}`);
+                throw new Error(erro);
             }
             return await res.json();
         } catch (erro) {
+            showToast(erro.message || "Erro ao remover item");
             throw erro;
         }
     },
@@ -82,19 +100,20 @@ const carrinhoService = {
         try {
             const token = await AsyncStorage.getItem("token");
             const res = await fetch(`${API_URL}/carrinho/limpar`, {
-                method: "POST", // trocar DELETE para POST
+                method: "POST",
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (!res.ok) {
                 const erro = await res.text();
-                throw new Error(`Erro ao limpar carrinho: ${erro}`);
+                showToast(`Erro ao limpar carrinho: ${erro}`);
+                throw new Error(erro);
             }
             return await res.json();
         } catch (erro) {
+            showToast(erro.message || "Erro ao limpar carrinho");
             throw erro;
         }
     }
-
 
 };
 
